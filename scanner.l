@@ -75,9 +75,9 @@ FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"[+-][0-9]+
 
  /*    Counting white space  */
 
-\n { yylloc.first_line++; yylloc.first_column = 1;}
-[ ] { yylloc.first_column++; }
-[\t] { yylloc.first_column += 8; }
+\n { yylloc.first_line++; yylloc.last_column = 0;}
+[ ] {  }
+[\t] {  }
 
  /*     Constants            */
 "true"      { yylval.boolConstant = true;
@@ -156,7 +156,7 @@ void InitScanner()
     PrintDebug("lex", "Initializing scanner");
     yy_flex_debug = false;
     yylloc.first_line = 1; 
-    yylloc.first_column = 1;
+    yylloc.last_column = 0;
 }
 
 
@@ -167,6 +167,7 @@ void InitScanner()
  */
 static void DoBeforeEachAction()
 {
+    yylloc.first_column = yylloc.last_column + 1;
     yylloc.last_column = yylloc.first_column + strlen(yytext) - 1;
     
 }
