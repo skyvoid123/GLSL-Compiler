@@ -54,10 +54,12 @@ static void DoBeforeEachAction();
   * as a simple substitution mechanism that allows for more readable
   * entries in the Rules section later. 
   */
+DIGIT [0-9]
+BASEFLOAT [0-9]+"."[0-9]+
+FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"[+-][0-9]+
 %{
 %}
 %x COMMENT
-
 %%             /* BEGIN RULES SECTION */
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
@@ -73,9 +75,18 @@ static void DoBeforeEachAction();
 
  /*    Counting white space  */
 
-\n { yylloc.first_line++; yylloc.first_column = 0;}
+\n { yylloc.first_line++; yylloc.first_column = 1;}
+[ ] { yylloc.first_column++; }
+[\t] { yylloc.first_column += 8; }
 
-[0-9]+"."[0-9]+ { printf("float"); }
+ /*     Constants            */
+"true"      { yylval.boolConstant = true;
+              return T_BoolConstant;     }
+"false"     { yylval.boolConstant = false;
+              return T_BoolConstant;     }
+{FLOAT}     { yylval.floatConstant = strtof(yytext, NULL);
+              return T_FloatConstant; }
+
 
  /*     KEYWORDS     */
 
@@ -99,8 +110,6 @@ static void DoBeforeEachAction();
 "int"      { return T_Int;      }
 "void"     { return T_Void;     }
 "bool"     { return T_Bool;     }
-"true"     { return T_True;     }
-"false"    { return T_False;    }
 "mat2"     { return T_Mat2;     }
 "mat3"     { return T_Mat3;     }
 "mat4"     { return T_Mat4;     }
@@ -118,6 +127,10 @@ static void DoBeforeEachAction();
 "uvec4"    { return T_UVec4;    }
 "uint"     { return T_UInt;     }
 "struct"   { return T_Struct;   }
+
+[a-zA-Z]+ {  strcpy(yylval.identifier, yytext);
+             return T_Identifier; }
+.? { return (int) *yytext; }
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
  * of the User Subroutines section. All text from here to the end of the
@@ -142,6 +155,8 @@ void InitScanner()
 {
     PrintDebug("lex", "Initializing scanner");
     yy_flex_debug = false;
+    yylloc.first_line = 1; 
+    yylloc.first_column = 1;
 }
 
 
@@ -152,6 +167,6 @@ void InitScanner()
  */
 static void DoBeforeEachAction()
 {
-    yylloc.first_column += strlen(yytext);
+    yylloc.last_column = yylloc.first_column + strlen(yytext) - 1;
     
 }
