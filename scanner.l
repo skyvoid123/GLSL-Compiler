@@ -54,12 +54,30 @@ static void DoBeforeEachAction();
   * as a simple substitution mechanism that allows for more readable
   * entries in the Rules section later. 
   */
-
+%{
+%}
+%x COMMENT
 
 %%             /* BEGIN RULES SECTION */
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
+
+ /*    COMMENTS     */
+
+"/*"          { printf("Start Comment\n"); 
+                BEGIN(COMMENT); }
+<COMMENT>"*/" { printf("\nEnd Comment\n");
+                BEGIN(INITIAL); }
+<COMMENT>.    { printf("%s", yytext); }
+
+ /*    Counting white space  */
+
+\n { yylloc.first_line++; yylloc.first_column = 0;}
+
+[0-9]+"."[0-9]+ { printf("float"); }
+
+ /*     KEYWORDS     */
 
 "const"    { return T_Const;    }
 "uniform"  { return T_Uniform;  }
@@ -134,4 +152,6 @@ void InitScanner()
  */
 static void DoBeforeEachAction()
 {
+    yylloc.first_column += strlen(yytext);
+    
 }

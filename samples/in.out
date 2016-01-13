@@ -1,0 +1,10 @@
+in           line 1 cols 1-2 is T_In 
+int          line 2 cols 1-3 is T_Int 
+integer      line 3 cols 1-7 is T_Identifier 
+int          line 4 cols 1-3 is T_Int 
+x            line 4 cols 5-5 is T_Identifier 
+;            line 4 cols 6-6 is ';' 
+in           line 6 cols 1-2 is T_In 
+int          line 6 cols 4-6 is T_Int 
+x            line 6 cols 8-8 is T_Identifier 
+;            line 6 cols 9-9 is ';' 

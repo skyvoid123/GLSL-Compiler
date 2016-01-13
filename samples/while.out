@@ -1,0 +1,9 @@
+while        line 1 cols 1-5 is T_While 
+(            line 1 cols 7-7 is '(' 
+ip           line 1 cols 9-10 is T_Identifier 
+<            line 1 cols 12-12 is '<' 
+z            line 1 cols 14-14 is T_Identifier 
+)            line 1 cols 16-16 is ')' 
+++           line 2 cols 4-5 is T_Inc 
+ip           line 2 cols 6-7 is T_Identifier 
+;            line 2 cols 8-8 is ';' 
