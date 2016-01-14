@@ -54,9 +54,19 @@ static void DoBeforeEachAction();
   * as a simple substitution mechanism that allows for more readable
   * entries in the Rules section later. 
   */
+UPPERCASE [A-Z]
+LOWERCASE [a-z]
+LETTER {UPPERCASE}|{LOWERCASE}
+LETTERS {LETTER}+
+NONDIGIT "_"|{LETTER}
 DIGIT [0-9]
-BASEFLOAT [0-9]+"."[0-9]+
-FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"[+-][0-9]+
+NUMBER {DIGIT}+
+IDENTIFIER {NONDIGIT}({DIGIT}|{NONDIGIT})*
+SIGN ("+"|"-")?
+INT {SIGN}{NUMBER}
+BASEFLOAT {SIGN}{NUMBER}"."{NUMBER}
+FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"("+"|"-")[0-9]+
+SINGLECHAROP "+"|"-"|"*"|"/"|"%"|"<"|">"|"="|"!"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
 %{
 %}
 %x COMMENT
@@ -86,7 +96,8 @@ FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"[+-][0-9]+
               return T_BoolConstant;     }
 {FLOAT}     { yylval.floatConstant = strtof(yytext, NULL);
               return T_FloatConstant; }
-
+{INT}       { yylval.integerConstant = atoi(yytext);
+              return T_IntConstant;  }
 
  /*     KEYWORDS     */
 
@@ -128,9 +139,9 @@ FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"[+-][0-9]+
 "uint"     { return T_UInt;     }
 "struct"   { return T_Struct;   }
 
-[a-zA-Z]+ {  strcpy(yylval.identifier, yytext);
-             return T_Identifier; }
-.? { return (int) *yytext; }
+{IDENTIFIER} {  strcpy(yylval.identifier, yytext);
+                return T_Identifier; }
+{SINGLECHAROP} { return (int) *yytext; }
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
  * of the User Subroutines section. All text from here to the end of the
