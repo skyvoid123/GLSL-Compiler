@@ -63,8 +63,8 @@ DIGIT [0-9]
 NUMBER {DIGIT}+
 IDENTIFIER {NONDIGIT}({DIGIT}|{NONDIGIT})*
 SIGN ("+"|"-")?
-INT {SIGN}{NUMBER}
-BASEFLOAT {SIGN}{NUMBER}"."{NUMBER}
+INT {NUMBER}
+BASEFLOAT {NUMBER}"."{NUMBER}
 FLOAT {BASEFLOAT}|{BASEFLOAT}"f"|{BASEFLOAT}"E"("+"|"-")[0-9]+
 SINGLECHAROP "+"|"-"|"*"|"/"|"%"|"<"|">"|"="|"!"|";"|","|"."|"["|"]"|"("|")"|"{"|"}"
 %{
