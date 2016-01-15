@@ -138,9 +138,15 @@ SINGLECHAROP "+"|"-"|"*"|"/"|"%"|"<"|">"|"="|"!"|";"|","|"."|"["|"]"|"("|")"|"{"
 "uvec4"    { return T_UVec4;    }
 "uint"     { return T_UInt;     }
 "struct"   { return T_Struct;   }
+"++"       { return T_Inc;      }
+"--"       { return T_Dec;      }
 
-{IDENTIFIER} {  strcpy(yylval.identifier, yytext);
-                return T_Identifier; }
+{IDENTIFIER} {  if (strlen(yytext) > 1023 ) {
+                  ReportError::LongIdentifier(&yylloc, (const char*)yytext);
+                } else { 
+		strncpy(yylval.identifier, yytext, 31);
+                return T_Identifier; 
+                }                      }
 {SINGLECHAROP} { return (int) *yytext; }
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
