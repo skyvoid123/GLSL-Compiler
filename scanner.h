@@ -33,7 +33,9 @@ typedef enum {
     T_Switch, T_Case, T_Default, T_In, T_Out, T_InOut, T_True, T_False,
     T_Mat2, T_Mat3, T_Mat4, T_Vec2, T_Vec3, T_Vec4, T_IVec2, T_IVec3, T_IVec4,
     T_BVec2, T_BVec3, T_BVec4, T_UInt, T_UVec2, T_UVec3, T_UVec4, T_Struct,
-    T_NumTokenTypes, T_Inc, T_Dec
+    T_Inc, T_Dec,
+    T_LogicAnd, T_LogicOr,
+    T_NumTokenTypes
 } TokenType;
 
  
@@ -53,7 +55,7 @@ static const char *gTokenNames[T_NumTokenTypes] = {
   "T_In", "T_Out", "T_InOut", "T_True", "T_False", "T_Mat2", "T_Mat3", "T_Mat4",
   "T_Vec2", "T_Vec3", "T_Vec4", "T_IVec2", "T_IVec3", "T_IVec4", 
   "T_BVec2", "T_BVec3", "T_BVec4", "T_UInt", "T_UVec2", "T_UVec3", "T_UVec4",
-  "T_Struct", "T_NumTokenTypes", "T_Inc", "T_Dec"
+  "T_Struct", "T_Inc", "T_Dec"
 };
 
  

@@ -3,7 +3,7 @@ for f in samples/*.frag
 do
     echo "Checking File $f"
     filename=$(basename $f .frag)
-    ./glc < $f > samples/$filename.output
+    ./glc < $f &> samples/$filename.output
     if cmp -s samples/$filename.output samples/$filename.out > samples/$filename.diff
     then
         echo "$filename is correct"
@@ -19,7 +19,7 @@ for f in samples/*.glsl
 do
     echo "Checking File $f"
     filename=$(basename $f .glsl)
-    ./glc < $f > samples/$filename.output
+    ./glc < $f &> samples/$filename.output
     if cmp -s samples/$filename.output samples/$filename.out > samples/$filename.diff
     then
         echo "$filename is correct"

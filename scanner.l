@@ -77,12 +77,10 @@ SINGLECHAROP "+"|"-"|"*"|"/"|"%"|"<"|">"|"="|"!"|";"|","|"."|"["|"]"|"("|")"|"{"
 
  /*    COMMENTS     */
 
-"/*"          { printf("Start Comment\n"); 
-                BEGIN(COMMENT); }
-<COMMENT>"*/" { printf("\nEnd Comment\n");
-                BEGIN(INITIAL); }
+"/*"          { BEGIN(COMMENT); }
+<COMMENT>"*/" { BEGIN(INITIAL); }
 <COMMENT>.    { printf("%s", yytext); }
-
+"//".*        { }
  /*    Counting white space  */
 
 \n { yylloc.first_line++; yylloc.last_column = 0;}
@@ -101,53 +99,63 @@ SINGLECHAROP "+"|"-"|"*"|"/"|"%"|"<"|">"|"="|"!"|";"|","|"."|"["|"]"|"("|")"|"{"
 
  /*     KEYWORDS     */
 
-"const"    { return T_Const;    }
-"uniform"  { return T_Uniform;  }
-"layout"   { return T_Layout;   }
-"break"    { return T_Break;    }
-"continue" { return T_Continue; }
-"do"       { return T_Do;       }
-"for"      { return T_For;      }
-"while"    { return T_While;    }
-"switch"   { return T_Switch;   }
-"case"     { return T_Case;     }
-"default"  { return T_Default;  }
-"if"       { return T_If;       }
-"else"     { return T_Else;     }
-"in"       { return T_In;       }
-"out"      { return T_Out;      }
-"inout"    { return T_InOut;    }
-"float"    { return T_Float;    }
-"int"      { return T_Int;      }
-"void"     { return T_Void;     }
-"bool"     { return T_Bool;     }
-"mat2"     { return T_Mat2;     }
-"mat3"     { return T_Mat3;     }
-"mat4"     { return T_Mat4;     }
-"vec2"     { return T_Vec2;     }
-"vec3"     { return T_Vec3;     }
-"vec4"     { return T_Vec4;     }
-"ivec2"    { return T_IVec2;    }
-"ivec3"    { return T_IVec3;    }
-"ivec4"    { return T_IVec4;    }
-"bvec2"    { return T_BVec2;    }
-"bvec3"    { return T_BVec3;    }
-"bvec4"    { return T_BVec4;    }
-"uvec2"    { return T_UVec2;    }
-"uvec3"    { return T_UVec3;    }
-"uvec4"    { return T_UVec4;    }
-"uint"     { return T_UInt;     }
-"struct"   { return T_Struct;   }
-"++"       { return T_Inc;      }
-"--"       { return T_Dec;      }
+"const"    { return T_Const;        }
+"uniform"  { return T_Uniform;      }
+"layout"   { return T_Layout;       }
+"break"    { return T_Break;        }
+"continue" { return T_Continue;     }
+"do"       { return T_Do;           }
+"for"      { return T_For;          }
+"while"    { return T_While;        }
+"switch"   { return T_Switch;       }
+"case"     { return T_Case;         }
+"default"  { return T_Default;      }
+"if"       { return T_If;           }
+"else"     { return T_Else;         }
+"in"       { return T_In;           }
+"out"      { return T_Out;          }
+"inout"    { return T_InOut;        }
+"float"    { return T_Float;        }
+"int"      { return T_Int;          }
+"void"     { return T_Void;         }
+"bool"     { return T_Bool;         }
+"mat2"     { return T_Mat2;         }
+"mat3"     { return T_Mat3;         }
+"mat4"     { return T_Mat4;         }
+"vec2"     { return T_Vec2;         }
+"vec3"     { return T_Vec3;         }
+"vec4"     { return T_Vec4;         }
+"ivec2"    { return T_IVec2;        }
+"ivec3"    { return T_IVec3;        }    
+"ivec4"    { return T_IVec4;        }
+"bvec2"    { return T_BVec2;        }
+"bvec3"    { return T_BVec3;        }
+"bvec4"    { return T_BVec4;        }  
+"uvec2"    { return T_UVec2;        }
+"uvec3"    { return T_UVec3;        }
+"uvec4"    { return T_UVec4;        }
+"uint"     { return T_UInt;         }
+"struct"   { return T_Struct;       }
+"++"       { return T_Inc;          }
+"--"       { return T_Dec;          }
+"<="       { return T_LessEqual;    }
+">="       { return T_GreaterEqual; }
+"=="       { return T_Equal;        }
+"!="       { return T_NotEqual;     }
+"&&"       { return T_And;          }
+"||"       { return T_Or;           }
+"[]"       { return T_Dims;         }
 
 {IDENTIFIER} {  if (strlen(yytext) > 1023 ) {
-                  ReportError::LongIdentifier(&yylloc, (const char*)yytext);
-                } else { 
-		strncpy(yylval.identifier, yytext, 31);
-                return T_Identifier; 
-                }                      }
+                    ReportError::LongIdentifier(&yylloc, (const char*)yytext);
+                } 
+                else { 
+		            strncpy(yylval.identifier, yytext, 31);
+                    return T_Identifier; 
+                }   
+             }
 {SINGLECHAROP} { return (int) *yytext; }
+.? {  ReportError::UnrecogChar(&yylloc, *yytext); }
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
  * of the User Subroutines section. All text from here to the end of the
