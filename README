@@ -1,0 +1,8 @@
+To do this PA it was pretty straighforward once we got the hang of flex. For most of the stuff it was just normal regular expressions but
+there was one complication which was multiline comments.
+For multi line comments we used states. The comment state begins on a "/*" and ends with a "*/"  and it ignore everything in between. And
+when it encounters a /n it will increase the line counter and reset the column counter.
+Our program catches all the keywords that were higlighted and all the valid single and double character operators. In addition it catches
+floats in the format of {Digit}+"."{Digit}*, {Digit}+"."{Digit}*"f" and {Digit}+"."{Digit}*"E"("+"|"-")?{Digit}+. And for Identifiers it
+uses the rule {NonDigit}({NonDigit}|{Digit})* and we then make sure that the identifiers doesn't exceed the limit. Finally for all the 
+other character we throw the unrecognize character error.
