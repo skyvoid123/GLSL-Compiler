@@ -1,4 +1,6 @@
 #!/bin/bash
+make clean
+make
 for f in samples/*.frag
 do
     echo "Checking File $f"
@@ -9,6 +11,7 @@ do
         echo "$filename is correct"
         echo 
         rm samples/$filename.diff
+        rm samples/$filename.output
     else
         echo "$filename is incorrect check samples/$filename.diff"
         echo
@@ -24,6 +27,7 @@ do
     then
         echo "$filename is correct"
         rm samples/$filename.diff
+        rm samples/$filename.output
         echo
     else
         echo "$filename is incorrect check samples/$filename.diff"
