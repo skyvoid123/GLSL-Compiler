@@ -140,7 +140,7 @@ SINGLE_COMMENT    ("//"[^\n]*)
                          return T_IntConstant; }
 {HEX_INTEGER}       { yylval.integerConstant = strtol(yytext, NULL, 16);
                          return T_IntConstant; }
-{FLOAT}             { yylval.doubleConstant = atof(yytext);
+{FLOAT}             { yylval.floatConstant = atof(yytext);
                          return T_FloatConstant; }
 
 

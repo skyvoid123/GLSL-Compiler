@@ -1,0 +1,43 @@
+Node
+  Declaration
+    Variable Declaration
+      Variable Declaration Error
+    Function Declaration
+      Function Declaration Error
+  Statement
+    Statement Block
+    Conditional Statement
+      Loop Statement
+        For Statement
+        While Statement
+      If Statement
+        If Statement Expression Error
+    Break Statement
+    Return Statement
+    Switch Label
+      Case
+      Default
+    Switch Statement
+      Switch Statement Error
+    Expression
+      Expression Error
+      Empty Expression
+      Int Constant
+      Float Constant
+      Bool Constant
+      Compound Expressions
+        Arithmethic Expression
+        Relational Expression
+        Equality Expression
+        Logical Expression
+        Assignment Expression
+        Postfix Expression
+      LValue
+        Array Access
+        Field Access
+      Call
+        Actuals error
+  Operator
+  Type
+    NamedType
+    ArrayType

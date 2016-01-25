@@ -42,7 +42,7 @@ void yyerror(const char *msg); // standard error-handling routine
     int integerConstant;
     bool boolConstant;
     char *stringConstant;
-    double doubleConstant;
+    float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
     List<Decl*> *declList;
