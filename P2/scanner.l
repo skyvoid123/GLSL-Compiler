@@ -92,6 +92,32 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "switch"            { return T_Switch;      }
 "case"              { return T_Case;        }
 "default"           { return T_Default;     }
+"const"             { return T_Const;       }
+"uniform"           { return T_Uniform;     }
+"layout"            { return T_Layout;      }
+"continue"          { return T_Continue;    }
+"do"                { return T_Do;          }
+"in"                { return T_In;          }
+"out"               { return T_Out;         }
+"inout"             { return T_InOut;       }
+"mat2"              { return T_Mat2;        }
+"mat3"              { return T_Mat3;        }
+"mat4"              { return T_Mat4;        }
+"vec2"              { return T_Vec2;        }
+"vec3"              { return T_Vec3;        }
+"vec4"              { return T_Vec4;        }
+"ivec2"             { return T_IVec2;       }
+"ivec3"             { return T_IVec3;       }
+"ivec4"             { return T_IVec4;       }
+"bvec2"             { return T_BVec2;       }
+"bvec3"             { return T_BVec3;       }
+"bvec4"             { return T_BVec4;       }
+"uvec2"             { return T_UVec2;       }
+"uvec3"             { return T_UVec3;       }
+"uvec4"             { return T_UVec4;       }
+"uint"              { return T_UInt;        }
+"struct"            { return T_Struct;      }
+
 
 
 

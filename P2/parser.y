@@ -60,6 +60,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_And T_Or 
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_Inc T_Dec T_Switch T_Case T_Default
+%token   T_Const T_Uniform T_Layout T_Continue T_Do T_In T_Out T_InOut
+%token   T_Mat2 T_Mat3 T_Mat4 T_Vec2 T_Vec3 T_Vec4 
+%token   T_IVec2 T_IVec3 T_IVec4 T_BVec2 T_BVec3 T_BVec4 
+%token   T_UVec2 T_UVec3 T_UVec4 T_UInt T_Struct
 
 %token   <identifier> T_Identifier
 %token   <integerConstant> T_IntConstant
