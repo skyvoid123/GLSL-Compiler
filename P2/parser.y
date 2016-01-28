@@ -44,6 +44,7 @@ void yyerror(const char *msg); // standard error-handling routine
     bool boolConstant;
     float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
+    Identifier *ident;
     Decl *decl;
     VarDecl *varD;
     VarDeclError *varDE;
@@ -120,14 +121,14 @@ void yyerror(const char *msg); // standard error-handling routine
  * of the union named "declList" which is of type List<Decl*>.
  * pp2: You'll need to add many of these of your own.
  */
-%type <identifier>	  v_ident;
+%type <ident>	  v_ident;
 %type <expr>	  prim_expr;
 %type <postfixE>	  pfix_expr;
 %type <arithmeticE>          unary_expr;
 %type <op>          unary_op;
 %type <arithmeticE>          multi_expr;
 %type <arithmeticE>          add_expr;
-%type <expr>          shift_expr;
+%type <arithmeticE>          shift_expr;
 %type <relationalE>          rel_expr;
 %type <equalityE>          equal_expr;
 %type <logicalE>          and_expr;
@@ -192,95 +193,92 @@ Program                     :    trans_unit            {
                                     }
                             ;
 
-v_ident                     :    T_Identifier	    { }
+v_ident                     :    T_Identifier	    { $$ = new Identifier(@1, $1); }
 
-prim_expr	                :    v_ident		    { }
-	                        |    T_IntConstant	    { }
-	                        |    T_FloatConstant	    { }
-	                        |    T_BoolConstant	    { }
-	                        |    '(' expr ')'   { }
+prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); }
+	                        |    T_IntConstant	    { $$ = new IntConstant(@1, $1); }
+	                        |    T_FloatConstant	    { $$ = new FloatConstant(@1, $1); }
+	                        |    T_BoolConstant	    { $$ = new BoolConstant(@1, $1); }
+	                        |    '(' expr ')'   {  }
 	                        ;
 
-pfix_expr                   :    prim_expr	    { }
+pfix_expr                   :    prim_expr	    { $$ = new PostfixExpr($1, NULL); }
 	                        |    pfix_expr '.' T_FieldSelection { }
-	                        |    pfix_expr T_Inc	    { }
-	                        |    pfix_expr T_Dec	    { }
+	                        |    pfix_expr T_Inc	    { $$ = new PostfixExpr($1, new Operator(@2, "++") ); }
+	                        |    pfix_expr T_Dec	    { $$ = new PostfixExpr($1, new Operator(@2, "--") ); }
 	                        ;
     
 unary_expr                  :    pfix_expr	    { }
-	                        |    T_Inc unary_expr     { }
-	                        |    T_Dec unary_expr	    { }
-	                        |    unary_op unary_expr  { }
+	                        |    T_Inc unary_expr     { $$ = new ArithmeticExpr(new Operator(@1, "++"), $2); }
+	                        |    T_Dec unary_expr	    { $$ = new ArithmeticExpr(new Operator(@1, "--"), $2);  }
+	                        |    unary_op unary_expr  { $$ = new ArithmeticExpr($1, $2); }
 	                        ;
     
-unary_op                    :    '+'		    { }
-	                        |    '-'		    { }
+unary_op                    :    '+'		    { $$ = new Operator(@1, "+"); }
+	                        |    '-'		    { $$ = new Operator(@1, "-"); }
 	                        ;
     
-multi_expr                  :    unary_expr	    { }
-	                        |    multi_expr '*' unary_expr { }
-	                        |    multi_expr '/' unary_expr { }
+multi_expr                  :    unary_expr	    { $$ = $1; }
+	                        |    multi_expr '*' unary_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3); }
+	                        |    multi_expr '/' unary_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3); }
 	                        ;
     
-add_expr                    :    multi_expr	    { }
-	                        |    add_expr '+' multi_expr { }
-	                        |    add_expr '-' multi_expr { }
+add_expr                    :    multi_expr	    { $$ = $1;}
+	                        |    add_expr '+' multi_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3); }
+	                        |    add_expr '-' multi_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3); }
 	                        ;
     
-shift_expr                  :    add_expr		    { }
+shift_expr                  :    add_expr		    { $$ = $1; }
 	                        ;
 
-rel_expr                    :    shift_expr	    { }
-	                        |    rel_expr '<' shift_expr { }
-	                        |    rel_expr '>' shift_expr { }
-	                        |    rel_expr T_LessEqual shift_expr    { }
-	                        |    rel_expr T_GreaterEqual shift_expr { }
+rel_expr                    :    shift_expr	    { $$ = new RelationalExpr($1->getLeft(), $1->getOp(), $1->getRight() );  }
+	                        |    rel_expr '<' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, "<"), $3); }
+	                        |    rel_expr '>' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">"), $3); }
+	                        |    rel_expr T_LessEqual shift_expr    { $$ = new RelationalExpr($1, new Operator(@2, "<="), $3); }
+	                        |    rel_expr T_GreaterEqual shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">="), $3); }
 	                        ;
         
-equal_expr                  :    rel_expr		    { }
-	                        |    equal_expr T_Equal rel_expr { }
-	                        |    equal_expr T_NotEqual rel_expr { }
+equal_expr                  :    rel_expr		    { $$ = new EqualityExpr($1->getLeft(), $1->getOp(), $1->getRight() ); }
+	                        |    equal_expr T_Equal rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "=="), $3); }
+	                        |    equal_expr T_NotEqual rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "!="), $3); }
 	                        ;
 
-and_expr                    :    equal_expr	    { }
+and_expr                    :    equal_expr	    { $$ = new LogicalExpr($1->getLeft(), $1->getOp(), $1->getRight() ); }
 	                        ;
 
-excl_or_expr                :    and_expr		    { }
+excl_or_expr                :    and_expr		    { $$=$1;}
 	                        ;
 
-incl_or_expr                :    excl_or_expr	    { }
+incl_or_expr                :    excl_or_expr	    { $$=$1; }
 	                        ;
 
-logic_and_expr              :    incl_or_expr { }
-	                        |    logic_and_expr T_And incl_or_expr { }
+logic_and_expr              :    incl_or_expr { $$=$1;}
+	                        |    logic_and_expr T_And incl_or_expr { $$ = new LogicalExpr($1, new Operator(@2, "&&"), $3); }
 	                        ;
     
-logic_xor_expr              :    logic_and_expr { }
+logic_xor_expr              :    logic_and_expr { $$=$1; }
                             ;
 
-logic_or_expr               :    logic_xor_expr { }
-                            |    logic_or_expr T_Or logic_xor_expr { }
+logic_or_expr               :    logic_xor_expr { $$=$1; }
+                            |    logic_or_expr T_Or logic_xor_expr { $$ = new LogicalExpr($1, new Operator(@2, "||"), $3); }
                             ;
 
-cond_expr                   :    logic_or_expr { }
+cond_expr                   :    logic_or_expr { $$=$1;}
 	                        ;
 
-assign_expr                 :    cond_expr { }
-	                        |    unary_expr assign_op assign_expr { }
+assign_expr                 :    cond_expr { $$ = new AssignExpr($1->getLeft(), $1->getOp(), $1->getRight()); }
+	                        |    unary_expr assign_op assign_expr { $$ = new AssignExpr($1, $2, $3); }
 	                        ;
 
-assign_op                   :    '=' 		    { }
-	                        |    '*='		    { }
-	                        |    '/='		    { }
-	                        |    '+='		    { }
-	                        |    '-='		    { }
+assign_op                   :    '=' 		    { $$ = new Operator(@1, "="); }
+	                        |    '*='		    { $$ = new Operator(@1, "*="); }
+	                        |    '/='		    { $$ = new Operator(@1, "/="); }
+	                        |    '+='		    { $$ = new Operator(@1, "+="); }
+	                        |    '-='		    { $$ = new Operator(@1, "-="); }
 	                        ;
 
-expr	                    :    assign_expr	    { }
+expr	                    :    assign_expr	    { $$ = $1; }
                             ;
-
-const_expr                  :    cond_expr	    { }
-	                        ;
 
 decl	                    :    func_proto ';'	    { $$=$1;}
 	                        |    init_declarator_list ';'{$$=$1; }

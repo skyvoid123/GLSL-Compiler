@@ -97,6 +97,9 @@ class CompoundExpr : public Expr
     CompoundExpr(Operator *op, Expr *rhs);             // for unary
     CompoundExpr(Expr *lhs, Operator *op);             // for unary
     void PrintChildren(int indentLevel);
+    Operator *getOp() {return op;}
+    Expr *getLeft() {return left;}
+    Expr *getRight() {return right;}
 };
 
 class ArithmeticExpr : public CompoundExpr 
