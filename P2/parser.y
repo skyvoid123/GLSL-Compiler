@@ -200,248 +200,248 @@ Program   :    declList            {
                                     }
           ;
 
-v_ident             :    T_Identifier	    { }
+v_ident                 :    T_Identifier	    { }
 
-prim_expr	        :    v_ident		    { }
-	                |    T_IntConstant	    { }
-	                |    T_FloatConstant	    { }
-	                |    T_BoolConstant	    { }
-	                |    '(' expr ')'   { }
-	                ;
+prim_expr	            :    v_ident		    { }
+	                    |    T_IntConstant	    { }
+	                    |    T_FloatConstant	    { }
+	                    |    T_BoolConstant	    { }
+	                    |    '(' expr ')'   { }
+	                    ;
 
-pfix_expr           :    prim_expr	    { }
-	                |    pfix_expr '.' T_FieldSelection { }
-	                |    pfix_expr T_Inc	    { }
-	                |    pfix_expr T_Dec	    { }
-	                ;
-
-int_expr            :    expr		    { }
-	                ;
-
-func_ident          :    type_spec	    { }
-	                |    pfix_expr	    { }
-	                ;
-
-unary_expr          :    pfix_expr	    { }
-	                |    T_Inc unary_expr     { }
-	                |    T_Dec unary_expr	    { }
-	                |    unary_op unary_expr  { }
-	                ;
-
-unary_op            :    '+'		    { }
-	                |    '-'		    { }
-	                ;
-
-multi_expr          :    unary_expr	    { }
-	                |    multi_expr '*' unary_expr { }
-	                |    multi_expr '/' unary_expr { }
-	                ;
-
-add_expr            :    multi_expr	    { }
-	                |    add_expr '+' multi_expr { }
-	                |    add_expr '-' multi_expr { }
-	                ;
-
-shift_expr          :    add_expr		    { }
-	                ;
-
-rel_expr            :    shift_expr	    { }
-	                |    rel_expr '<' shift_expr { }
-	                |    rel_expr '>' shift_expr { }
-	                |    rel_expr T_LessEqual shift_expr    { }
-	                |    rel_expr T_GreaterEqual shift_expr { }
-	                ;
+pfix_expr               :    prim_expr	    { }
+	                    |    pfix_expr '.' T_FieldSelection { }
+	                    |    pfix_expr T_Inc	    { }
+	                    |    pfix_expr T_Dec	    { }
+	                    ;
     
-equal_expr          :    rel_expr		    { }
-	                |    equal_expr T_Equal rel_expr { }
-	                |    equal_expr T_NotEqual rel_expr { }
-	                ;
-
-and_expr            :    equal_expr	    { }
-	                ;
-
-excl_or_expr        :    and_expr		    { }
-	                ;
-
-incl_or_expr        :    excl_or_expr	    { }
-	                ;
-
-logic_and_expr      :    incl_or_expr { }
-	                |    logic_and_expr T_And incl_or_expr { }
-	                ;
-
-logic_xor_expr      :    logic_and_expr { }
-                    ;
-
-logic_or_expr       :    logic_xor_expr { }
-                    |    logic_or_expr T_Or logic_xor_expr { }
-                    ;
-
-cond_expr           :    logic_or_expr { }
-	                ;
-
-assign_expr         :    cond_expr { }
-	                |    unary_expr assign_op assign_expr { }
-	                ;
-
-assign_op           :    '=' 		    { }
-	                |    '*='		    { }
-	                |    '/='		    { }
-	                |    '+='		    { }
-	                |    '-='		    { }
-	                ;
-
-expr	            :    assign_expr	    { }
-                    ;
-
-const_expr          :    cond_expr	    { }
-	                ;
-
-decl	            :    func_proto ';'	    { }
-	                |    init_declarator_list ';'{ }
-	                ;
-
-func_proto          :    func_declarator '('     { }
-	                ;
-
-func_declarator     :    func_hdr		    { }
-	                |    func_hdr_w_param     { }
-	                ;
-
-func_hdr_w_param    :    func_hdr param_declaration { }
-	                |    func_hdr_w_param ',' param_declaration { }
-	                ;
-
-func_hdr            :    fully_spec_type T_Identifier '(' { }
-	                ;
-
-param_declarator    :    type_spec T_Identifier { }
-                    ;
-
-param_declaration   :    param_declarator     { }
-	                |    param_type_spec	    { }
-	                ;
-
-param_type_spec     :    type_spec          { }
-	                ;
-
-init_declarator_list:    single_declaration   { }
-	                ;
-
-single_declaration  :    fully_spec_type T_Identifier { }
-	                ;
-
-fully_spec_type     :    type_spec          { }
-	                ;
-
-type_spec           :    type_spec_nonarray   { }
-                    ;
-
-type_spec_nonarray  : T_Void	    { }
-	                |    T_Float		    { }
-	                |    T_Int	            { }
-	                |    T_Vec2		    { }
-	                |    T_Vec3		    { }
-	                |    T_Vec4		    { }
-	                |    T_Mat2	            { }
-	                |    T_Mat3		    { }
-	                    |    T_Mat4		    { }
+int_expr                :    expr		    { }
+	                    ;
+    
+func_ident              :    type_spec	    { }
+	                    |    pfix_expr	    { }
+	                    ;
+    
+unary_expr              :    pfix_expr	    { }
+	                    |    T_Inc unary_expr     { }
+	                    |    T_Dec unary_expr	    { }
+	                    |    unary_op unary_expr  { }
+	                    ;
+    
+unary_op                :    '+'		    { }
+	                        |    '-'		    { }
+	                    ;
+    
+multi_expr              :    unary_expr	    { }
+	                    |    multi_expr '*' unary_expr { }
+	                    |    multi_expr '/' unary_expr { }
+	                    ;
+    
+add_expr                :    multi_expr	    { }
+	                    |    add_expr '+' multi_expr { }
+	                    |    add_expr '-' multi_expr { }
+	                    ;
+    
+shift_expr              :    add_expr		    { }
 	                    ;
 
-init                    :    assign_expr	    { }
+rel_expr                :    shift_expr	    { }
+	                    |    rel_expr '<' shift_expr { }
+	                    |    rel_expr '>' shift_expr { }
+	                    |    rel_expr T_LessEqual shift_expr    { }
+	                    |    rel_expr T_GreaterEqual shift_expr { }
+	                    ;
+    
+equal_expr              :    rel_expr		    { }
+	                    |    equal_expr T_Equal rel_expr { }
+	                    |    equal_expr T_NotEqual rel_expr { }
 	                    ;
 
-declaration_statement   : decl  { }
+and_expr                :    equal_expr	    { }
 	                    ;
 
-statement               :    comp_statement_w_scope { }
-                        |    simple_statement       { }
+excl_or_expr            :    and_expr		    { }
 	                    ;
 
-statement_no_new_scope  : comp_statement_no_new_scope { }
-                        |    simple_statement	    { }
+incl_or_expr            :    excl_or_expr	    { }
 	                    ;
 
-statement_w_scope       : comp_statement_no_new_scope { }
-	                    |    simple_statement     { }
+logic_and_expr          :    incl_or_expr { }
+	                    |    logic_and_expr T_And incl_or_expr { }
+	                    ;
+    
+logic_xor_expr          :    logic_and_expr { }
+                        ;
+
+logic_or_expr           :    logic_xor_expr { }
+                        |    logic_or_expr T_Or logic_xor_expr { }
+                        ;
+
+cond_expr               :    logic_or_expr { }
 	                    ;
 
-simple_statement        : declaration_statement { }
-	                    |    expr_statement       { }
-	                    |    select_statement     { }
-	                    |    switch_statement     { }
-	                    |    case_label	    { }
-	                    |    iter_statement	    { }
+assign_expr             :    cond_expr { }
+	                    |    unary_expr assign_op assign_expr { }
 	                    ;
 
-comp_statement_w_scope  : '{' '}'     { }
-	                    |    '{' statement_list '}' { }
+assign_op               :    '=' 		    { }
+	                    |    '*='		    { }
+	                    |    '/='		    { }
+	                    |    '+='		    { }
+	                    |    '-='		    { }
 	                    ;
 
-comp_statement_no_new_scope: '{' '}' { } 
-      |     '{' statement_list '}' { }
-      ;
+expr	                :    assign_expr	    { }
+                        ;
 
-statement_list: statement           { }
-          |    statement_list statement { }
-	  ;
+const_expr              :    cond_expr	    { }
+	                    ;
 
-expr_statement: ';'	            { }
-	  |    expr ';'	            { }
-	  ;
+decl	                :    func_proto ';'	    { }
+	                    |    init_declarator_list ';'{ }
+	                    ;
 
-select_statement: T_If '(' expr ')' select_rest_statement { }
-	  ;
+func_proto              :    func_declarator '('     { }
+	                    ;
 
-select_rest_statement: statement_w_scope T_Else statement_w_scope { }
-	  |    statement_w_scope    { }
-	  ;
+func_declarator         :    func_hdr		    { }
+	                    |    func_hdr_w_param     { }
+	                    ;
+    
+func_hdr_w_param        :    func_hdr param_declaration { }
+	                    |    func_hdr_w_param ',' param_declaration { }
+	                    ;
 
-cond      :    expr	 	    { }
-	  |    fully_spec_type T_Identifier '=' init { }
-	  ;
+func_hdr                :    fully_spec_type T_Identifier '(' { }
+	                    ;
 
-switch_statement: T_Switch '(' expr ')' '{' switch_statement_list '}' { }
-	  ;
+param_declarator        :    type_spec T_Identifier { }
+                        ;
 
-switch_statement_list: { }
-	  | statement_list { }
-	  ;
+param_declaration       :    param_declarator     { }
+	                    |    param_type_spec	    { }
+	                    ;
 
-case_label:    T_Case expr ':'      { }
-	  |    T_Default ':'        { }
-	  ;
+param_type_spec         :    type_spec          { }
+	                    ;
 
-iter_statement: T_While '(' cond ')' statement_no_new_scope { }
-	  |    T_For '(' for_init_statement for_rest_statement ')'
-			statement_no_new_scope { }
-	  ;
+init_declarator_list    :    single_declaration   { }
+	                    ;
 
-for_init_statement: expr_statement  { }
-	  |    declaration_statement { }
-	  ;
+single_declaration      :    fully_spec_type T_Identifier { }
+	                    ;
 
-condopt   :    cond	            { }
-	  |    	                    { }
-	  ;
+fully_spec_type         :    type_spec          { }
+	                    ;
 
-for_rest_statement: condopt ';'     { }
-	  |    condopt ';' expr	    { }
-	  ;
+type_spec               :    type_spec_nonarray   { }
+                        ;
 
-trans_unit:    ext_declaration      { }
-	  |    trans_unit ext_declaration { }
+type_spec_nonarray      : T_Void	    { }
+	                    |    T_Float		    { }
+	                    |    T_Int	            { }
+	                    |    T_Vec2		    { }
+	                    |    T_Vec3		    { }
+	                    |    T_Vec4		    { }
+	                    |    T_Mat2	            { }
+	                    |    T_Mat3		    { }
+	                        |    T_Mat4		    { }
+	                        ;
 
-ext_declaration: func_def           { }
-          |    decl          { }
-	  ;
+init                        :    assign_expr	    { }
+	                        ;
 
-func_def  :    func_proto comp_statement_no_new_scope { }
-          ;
+declaration_statement       : decl  { }
+	                        ;
 
-DeclList  :    DeclList decl        { ($$=$1)->Append($2); }
-          |    decl                 { ($$ = new List<Decl*>)->Append($1); }
-          ;
+statement                   :    comp_statement_w_scope { }
+                            |    simple_statement       { }
+	                        ;
+
+statement_no_new_scope      : comp_statement_no_new_scope { }
+                            |    simple_statement	    { }
+	                        ;
+
+statement_w_scope           : comp_statement_no_new_scope { }
+	                        |    simple_statement     { }
+	                        ;
+
+simple_statement            : declaration_statement { }
+	                        |    expr_statement       { }
+	                        |    select_statement     { }
+	                        |    switch_statement     { }
+	                        |    case_label	    { }
+	                        |    iter_statement	    { }
+	                        ;
+
+comp_statement_w_scope      : '{' '}'     { }
+	                        |    '{' statement_list '}' { }
+	                        ;
+
+comp_statement_no_new_scope : '{' '}' { } 
+                            |     '{' statement_list '}' { }
+                            ;
+
+statement_list              : statement           { }
+                            |    statement_list statement { }
+	                        ;
+
+expr_statement              : ';'	            { }
+	                        |    expr ';'	            { }
+	                        ;
+
+select_statement            : T_If '(' expr ')' select_rest_statement { }
+	                        ;
+
+select_rest_statement       : statement_w_scope T_Else statement_w_scope { }
+	                        |    statement_w_scope    { }
+	                        ;
+
+cond                        :    expr	 	    { }
+	                        |    fully_spec_type T_Identifier '=' init { }
+	                        ;
+
+switch_statement            : T_Switch '(' expr ')' '{' switch_statement_list '}' { }
+	                        ;
+
+switch_statement_list       : { }
+	                        | statement_list { }
+	                        ;
+
+case_label                  :    T_Case expr ':'      { }
+	                        |    T_Default ':'        { }
+	                        ;
+
+iter_statement              : T_While '(' cond ')' statement_no_new_scope { }
+	                        |    T_For '(' for_init_statement for_rest_statement ')'
+			                                statement_no_new_scope { }
+	                        ;
+
+for_init_statement          : expr_statement  { }
+	                        |    declaration_statement { }
+	                        ;
+
+condopt                     :    cond	            { }
+	                        |    	                    { }
+	                        ;
+
+for_rest_statement          : condopt ';'     { }
+	                        |    condopt ';' expr	    { }
+	                        ;
+
+trans_unit                  :    ext_declaration      { }
+	                        |    trans_unit ext_declaration { }
+
+ext_declaration             : func_def           { }
+                            |    decl          { }
+	                        ;
+
+func_def                    :    func_proto comp_statement_no_new_scope { }
+                            ;
+
+DeclList                    :    DeclList decl        { ($$=$1)->Append($2); }
+                            |    decl                 { ($$ = new List<Decl*>)->Append($1); }
+                            ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
