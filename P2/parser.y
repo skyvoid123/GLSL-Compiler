@@ -347,7 +347,7 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ } 
+Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
           ;
           
 
