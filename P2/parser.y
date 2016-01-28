@@ -148,7 +148,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fnD>          func_proto;
 %type <fnD>          func_declarator;
 %type <fnD>          func_hdr_w_param;
-%type <tup>          func_hdr;
+%type <fnD>          func_hdr;
 %type <varD>          param_declarator;
 %type <varD>          param_declaration;
 %type <type>          param_type_spec;
@@ -305,15 +305,11 @@ func_declarator             :    func_hdr		    { }
 	                        |    func_hdr_w_param     { }
 	                        ;
     
-func_hdr_w_param            :    func_hdr param_declaration { $$ = FnDecl($1->first, $1->second, (new List<VarDecl*>)->Append($2)); }
+func_hdr_w_param            :    func_hdr param_declaration {  }
 	                        |    func_hdr_w_param ',' param_declaration { }
 	                        ;
 
-func_hdr                    :    fully_spec_type T_Identifier '(' { 
-				std::pair<Type*, Identifier*> *tup;
-                                tup->first = $1;
-				tup->second = new Identifier(yyloc, $2);
-				$$ = tup;}
+func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl(new Identifier(@1, $2), $1, new List<VarDecl*>);}
 
 param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(@1, $2), $1); }
                             ;
@@ -365,7 +361,7 @@ simple_statement            : declaration_statement { }
 	                        |    iter_statement	    { }
 	                        ;
 
-comp_statement              : '{' '}'     {$$ = Stmt(@2); }
+comp_statement              : '{' '}'     {$$ = NULL; }
 	                        |    '{' statement_list '}' { }
 	                        ;
 
@@ -424,7 +420,7 @@ ext_declaration             :    func_def           { }
                             |    decl          { }
 	                        ;
 
-func_def                    :    func_proto comp_statement { $1->SetFunctionBody($2); }
+func_def                    :    func_proto comp_statement { if ($2 != NULL) $1->SetFunctionBody($2); }
                             ;
 
 %%
