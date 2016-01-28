@@ -312,40 +312,40 @@ func_hdr_w_param            :    func_hdr param_declaration { }
 	                        |    func_hdr_w_param ',' param_declaration { }
 	                        ;
 
-func_hdr                    :    fully_spec_type T_Identifier '(' { }
+func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl( new Identifier(yylloc, $2), $1, NULL); }
 	                        ;
 
-param_declarator            :    type_spec T_Identifier { }
+param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(yylloc, $2), $1); }
                             ;
 
-param_declaration           :    param_declarator     { }
-	                        |    param_type_spec	    { }
+param_declaration           :    param_declarator     { $$ = $1; }
+	                        |    param_type_spec	    { $$ = new VarDecl(NULL, $1); }
 	                        ;
 
-param_type_spec             :    type_spec          { }
+param_type_spec             :    type_spec          { $$ = $1;}
 	                        ;
 
-init_declarator_list        :    single_declaration   { }
+init_declarator_list        :    single_declaration   { $$ = $1; }
 	                        ;
 
-single_declaration          :    fully_spec_type T_Identifier { }
+single_declaration          :    fully_spec_type T_Identifier { $$ = new VarDecl(new Identifier(yylloc, $2), $1); }
 	                        ;
 
-fully_spec_type             :    type_spec          { }
+fully_spec_type             :    type_spec          { $$ = $1; }
 	                        ;
 
-type_spec                   :    type_spec_nonarray   { }
+type_spec                   :    type_spec_nonarray   { $$ = $1; }
                             ;
 
-type_spec_nonarray          :    T_Void	    { }
-	                        |    T_Float		    { }
-	                        |    T_Int	            { }
-	                        |    T_Vec2		    { }
-	                        |    T_Vec3		    { }
-	                        |    T_Vec4		    { }
-	                        |    T_Mat2	            { }
-	                        |    T_Mat3		    { }
-	                        |    T_Mat4		    { }
+type_spec_nonarray          :    T_Void	    { $$ = Type::voidType; }
+	                        |    T_Float    { $$ = Type::floatType; }
+	                        |    T_Int	    { $$ = Type::intType; }
+	                        |    T_Vec2		{ $$ = Type::vec2Type; }
+	                        |    T_Vec3		{ $$ = Type::vec3Type; }
+	                        |    T_Vec4		{ $$ = Type::vec4Type; }
+	                        |    T_Mat2	    { $$ = Type::mat2Type; }
+	                        |    T_Mat3		{ $$ = Type::mat3Type; }
+	                        |    T_Mat4		{ $$ = Type::mat4Type; }
 	                        ;
 
 init                        :    assign_expr	    { }
