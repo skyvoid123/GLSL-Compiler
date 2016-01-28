@@ -42,4 +42,6 @@ void FnDecl::PrintChildren(int indentLevel) {
     if (body) body->Print(indentLevel+1, "(body) ");
 }
 
-
+void FnDecl::Append(VarDecl* app) {
+    formals->Append(app);
+}
