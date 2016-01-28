@@ -126,7 +126,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <postfixE>	  pfix_expr;
 %type <expr>  int_expr;
 %type <identifier>	  func_ident;
-%type <expr>          unary_expr;
+%type <arithmeticE>          unary_expr;
 %type <op>          unary_op;
 %type <arithmeticE>          multi_expr;
 %type <arithmeticE>          add_expr;
