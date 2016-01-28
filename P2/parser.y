@@ -188,7 +188,7 @@ void yyerror(const char *msg); // standard error-handling routine
  * %% markers which delimit the Rules section.
 	 
  */
-Program   :    declList            { 
+Program                     :    DeclList            { 
                                       @1; 
                                       /* pp2: The @1 is needed to convince 
                                        * yacc to set up yylloc. You can remove 
@@ -198,7 +198,7 @@ Program   :    declList            {
                                       if (ReportError::NumErrors() == 0) 
                                           program->Print(0);
                                     }
-          ;
+                            ;
 
 v_ident                     :    T_Identifier	    { }
 
@@ -337,7 +337,7 @@ fully_spec_type             :    type_spec          { }
 type_spec                   :    type_spec_nonarray   { }
                             ;
 
-type_spec_nonarray          : T_Void	    { }
+type_spec_nonarray          :    T_Void	    { }
 	                        |    T_Float		    { }
 	                        |    T_Int	            { }
 	                        |    T_Vec2		    { }
