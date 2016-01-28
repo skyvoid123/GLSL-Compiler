@@ -19,6 +19,7 @@
 #include "scanner.h" // for yylex
 #include "parser.h"
 #include "errors.h"
+#include <utility>
 
 void yyerror(const char *msg); // standard error-handling routine
 
@@ -83,7 +84,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Operator *op;
     Error *error;
     Program *program;
-    
+    std::pair<Type*, Identifier*> *tup;
 }
 
 
@@ -148,7 +149,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fnD>          func_proto;
 %type <fnD>          func_declarator;
 %type <fnD>          func_hdr_w_param;
-%type <fnD>          func_hdr;
+%type <tup>          func_hdr;
 %type <varD>          param_declarator;
 %type <varD>          param_declaration;
 %type <type>          param_type_spec;
@@ -301,25 +302,28 @@ decl	                    :    func_proto ';'	    { }
 	                        |    init_declarator_list ';'{ }
 	                        ;
 
-func_proto                  :    func_declarator '('     { }
+func_proto                  :    func_declarator ')'     { }
 	                        ;
 
 func_declarator             :    func_hdr		    { }
 	                        |    func_hdr_w_param     { }
 	                        ;
     
-func_hdr_w_param            :    func_hdr param_declaration { }
-	                        |    func_hdr_w_param ',' param_declaration { }
+func_hdr_w_param            :    func_hdr param_declaration { $$ = FnDecl($1->first, $1->second, (new List<VarDecl*>)->Append($2)); }
+	                        |    func_hdr_w_param ',' param_declaration { $2-}
 	                        ;
 
-func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl( new Identifier(yylloc, $2), $1, NULL); }
+func_hdr                    :    fully_spec_type T_Identifier '(' { 
+				std::pair<Type*, Identifier*> *tup;
+                                tup->first = $1;
+				tup->second = new Identifier(yyloc, $2);
+				$$ = tup;}
 	                        ;
 
 param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(yylloc, $2), $1); }
                             ;
 
 param_declaration           :    param_declarator     { $$ = $1; }
-	                        |    param_type_spec	    { $$ = new VarDecl(NULL, $1); }
 	                        ;
 
 param_type_spec             :    type_spec          { $$ = $1;}
