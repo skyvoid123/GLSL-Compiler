@@ -124,8 +124,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <identifier>	  v_ident;
 %type <expr>	  prim_expr;
 %type <postfixE>	  pfix_expr;
-%type <expr>  int_expr;
-%type <identifier>	  func_ident;
 %type <arithmeticE>          unary_expr;
 %type <op>          unary_op;
 %type <arithmeticE>          multi_expr;
@@ -143,7 +141,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignE>          assign_expr;
 %type <op>          assign_op;
 %type <expr>          expr;
-%type <expr>          const_expr;
 %type <decl>          decl;
 %type <fnD>          func_proto;
 %type <fnD>          func_declarator;
@@ -151,7 +148,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <fnD>          func_hdr;
 %type <varD>          param_declarator;
 %type <varD>          param_declaration;
-%type <type>          param_type_spec;
 %type <decl>          init_declarator_list;
 %type <decl>          single_declaration;
 %type <type>          fully_spec_type;
@@ -210,13 +206,6 @@ pfix_expr                   :    prim_expr	    { }
 	                        |    pfix_expr '.' T_FieldSelection { }
 	                        |    pfix_expr T_Inc	    { }
 	                        |    pfix_expr T_Dec	    { }
-	                        ;
-    
-int_expr                    :    expr		    { }
-	                        ;
-    
-func_ident                  :    type_spec	    { }
-	                        |    pfix_expr	    { }
 	                        ;
     
 unary_expr                  :    pfix_expr	    { }
@@ -291,9 +280,6 @@ assign_op                   :    '=' 		    { }
 expr	                    :    assign_expr	    { }
                             ;
 
-const_expr                  :    cond_expr	    { }
-	                        ;
-
 decl	                    :    func_proto ';'	    { }
 	                        |    init_declarator_list ';'{ }
 	                        ;
@@ -309,15 +295,14 @@ func_hdr_w_param            :    func_hdr param_declaration {  }
 	                        |    func_hdr_w_param ',' param_declaration { }
 	                        ;
 
-func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl(new Identifier(@1, $2), $1, new List<VarDecl*>);}
+func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl(new Identifier(@1, $2), $1, 
+                                                                    new List<VarDecl*>);}
+                            ;
 
 param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(@1, $2), $1); }
                             ;
 
 param_declaration           :    param_declarator     { $$ = $1; }
-	                        ;
-
-param_type_spec             :    type_spec          { $$ = $1;}
 	                        ;
 
 init_declarator_list        :    single_declaration   { $$ = $1; }
