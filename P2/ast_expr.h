@@ -143,6 +143,15 @@ class PostfixExpr : public CompoundExpr
     const char *GetPrintNameForNode() { return "PostfixExpr"; }
 };
 
+class VarExpr : public Expr
+{
+  protected:
+    Identifier *id;
+  public:
+    VarExpr(yyltype loc, Identifier *ident);
+    const char * GetPrintNameForNode() { return "VarExpr"; }
+    void PrintChildren(int identLevel);
+};
 class LValue : public Expr 
 {
   public:

@@ -41,11 +41,49 @@ void yyerror(const char *msg); // standard error-handling routine
 %union {
     int integerConstant;
     bool boolConstant;
-    char *stringConstant;
     float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
+    VarDecl *varD;
+    VarDeclError *varDE;
+    FnDecl *fnD;
+    FormalsError *formalsE;
     List<Decl*> *declList;
+    Stmt *stmt;
+    StmtBlock *stmtB;
+    SwitchLabel *switchL;
+    Default *def;
+    Case *c;
+    BreakStmt *breakS;
+    ConditionalStmt *conditionalS;
+    LoopStmt *loopS;
+    ForStmt *forS;
+    WhileStmt *whileS;
+    IfStmt *ifS;
+    IfStmtExprError *ifSEE;
+    SwitchStmt *switchS;
+    SwitchStmtError *switchSE;
+    Expr *expr;
+    LValue *lV;
+    FieldAccess *fieldA;
+    ArrayAccess *arrayA;
+    ExprError *exprE;
+    EmptyExpr *emptyE;
+    CompoundExpr *compoundE;
+    PostfixExpr *postfixE;
+    ArithmeticExpr *arithmeticE;
+    RelationalExpr *relationalE;
+    EqualityExpr *equalityE;
+    LogicalExpr *logicalE;
+    AssignExpr *assignE;
+    ReturnStmt *returnS;
+    Type *type;
+    ArrayType *arrayT;
+    NamedType *namedT;
+    Operator *op;
+    Error *error;
+    Program *program;
+    
 }
 
 
@@ -83,7 +121,65 @@ void yyerror(const char *msg); // standard error-handling routine
  * pp2: You'll need to add many of these of your own.
  */
 %type <declList>  DeclList 
-%type <decl>      Decl
+%type <identifier>	  v_ident;
+%type <expr>	  prim_expr;
+%type <postfixE>	  pfix_expr;
+%type <expr>  int_expr;
+%type <identifier>	  func_ident;
+%type <expr>          unary_expr;
+%type <op>          unary_op;
+%type <arithmeticE>          multi_expr;
+%type <arithmeticE>          add_expr;
+%type <expr>          shift_expr;
+%type <relationalE>          rel_expr;
+%type <equalityE>          equal_expr;
+%type <logicalE>          and_expr;
+%type <logicalE>          excl_or_expr;
+%type <logicalE>          incl_or_expr;
+%type <logicalE>          logic_and_expr;
+%type <logicalE>          logic_xor_expr;
+%type <logicalE>          logic_or_expr;
+%type <logicalE>          cond_expr;
+%type <assignE>          assign_expr;
+%type <op>          assign_op;
+%type <expr>          expr;
+%type <expr>          const_expr;
+%type <decl>          decl;
+%type <fnD>          func_proto;
+%type <fnD>          func_declarator;
+%type <fnD>          func_hdr_w_param;
+%type <fnD>          func_hdr;
+%type <varD>          param_declarator;
+%type <varD>          param_declaration;
+%type <type>          param_type_spec;
+%type <decl>          init_declarator_list;
+%type <decl>          single_declaration;
+%type <type>          fully_spec_type;
+%type <type>          type_spec;
+%type <type>          type_spec_nonarray;
+%type <assignE>          init;
+%type <decl>          declaration_statement;
+%type <stmt>          statement;
+%type <stmt>          statement_no_new_scope;
+%type <stmt>          statement_w_scope;
+%type <stmt>          simple_statement;
+%type <stmt>          comp_statement_w_scope;
+%type <stmt>          comp_statement_no_new_scope;
+%type <stmtB>          statement_list;
+%type <expr>          expr_statement;
+%type <ifS>          select_statement;
+%type <ifS>          select_rest_statement;
+%type <conditionalS>          cond;
+%type <switchS>          switch_statement;
+%type <switchS>          switch_statement_list;
+%type <switchL>          case_label;
+%type <loopS>          iter_statement;
+%type <forS>          for_init_statement;
+%type <conditionalS>          condopt;
+%type <forS>          for_rest_statement;
+%type <stmt>          trans_unit;
+%type <decl>          ext_declaration;
+%type <fnD>          func_def;
 
 %%
 /* Rules
@@ -164,28 +260,28 @@ equal_expr          :    rel_expr		    { }
 and_expr            :    equal_expr	    { }
 	                ;
 
-excl_or_expr        :  and_expr		    { }
+excl_or_expr        :    and_expr		    { }
 	                ;
 
-incl_or_expr        :  excl_or_expr	    { }
+incl_or_expr        :    excl_or_expr	    { }
 	                ;
 
-logic_and_expr      : incl_or_expr { }
-	                |logic_and_expr T_And incl_or_expr { }
+logic_and_expr      :    incl_or_expr { }
+	                |    logic_and_expr T_And incl_or_expr { }
 	                ;
 
-logic_xor_expr      :logic_and_expr { }
+logic_xor_expr      :    logic_and_expr { }
                     ;
 
-logic_or_expr       :logic_xor_expr { }
-                    |logic_or_expr T_Or logic_xor_expr { }
+logic_or_expr       :    logic_xor_expr { }
+                    |    logic_or_expr T_Or logic_xor_expr { }
                     ;
 
-cond_expr           : logic_or_expr { }
+cond_expr           :    logic_or_expr { }
 	                ;
 
-assign_expr         :   cond_expr { }
-	                |   unary_expr assign_op assign_expr { }
+assign_expr         :    cond_expr { }
+	                |    unary_expr assign_op assign_expr { }
 	                ;
 
 assign_op           :    '=' 		    { }
@@ -208,79 +304,79 @@ decl	            :    func_proto ';'	    { }
 func_proto          :    func_declarator '('     { }
 	                ;
 
-func_declarator     :  func_hdr		    { }
+func_declarator     :    func_hdr		    { }
 	                |    func_hdr_w_param     { }
 	                ;
 
-func_hdr_w_param    : func_hdr param_declaration { }
+func_hdr_w_param    :    func_hdr param_declaration { }
 	                |    func_hdr_w_param ',' param_declaration { }
 	                ;
 
 func_hdr            :    fully_spec_type T_Identifier '(' { }
 	                ;
 
-param_declarator    : type_spec T_Identifier { }
+param_declarator    :    type_spec T_Identifier { }
                     ;
 
-param_declaration: param_declarator     { }
+param_declaration   :    param_declarator     { }
 	                |    param_type_spec	    { }
 	                ;
 
-param_type_spec     : type_spec          { }
+param_type_spec     :    type_spec          { }
 	                ;
 
-init_declarator_list: single_declaration   { }
+init_declarator_list:    single_declaration   { }
 	                ;
 
-single_declaration  : fully_spec_type T_Identifier { }
+single_declaration  :    fully_spec_type T_Identifier { }
 	                ;
 
-fully_spec_type     : type_spec          { }
+fully_spec_type     :    type_spec          { }
 	                ;
 
 type_spec           :    type_spec_nonarray   { }
                     ;
 
-type_spec_nonarray: T_Void	    { }
-	  |    T_Float		    { }
-	  |    T_Int	            { }
-	  |    T_Vec2		    { }
-	  |    T_Vec3		    { }
-	  |    T_Vec4		    { }
-	  |    T_Mat2	            { }
-	  |    T_Mat3		    { }
-	  |    T_Mat4		    { }
-	  ;
+type_spec_nonarray  : T_Void	    { }
+	                |    T_Float		    { }
+	                |    T_Int	            { }
+	                |    T_Vec2		    { }
+	                |    T_Vec3		    { }
+	                |    T_Vec4		    { }
+	                |    T_Mat2	            { }
+	                |    T_Mat3		    { }
+	                    |    T_Mat4		    { }
+	                    ;
 
-init      :    assign_expr	    { }
-	  ;
+init                    :    assign_expr	    { }
+	                    ;
 
-declaration_statement: decl  { }
-	  ;
+declaration_statement   : decl  { }
+	                    ;
 
-statement :    comp_statement_w_scope { }
-          |    simple_statement       { }
-	  ;
+statement               :    comp_statement_w_scope { }
+                        |    simple_statement       { }
+	                    ;
 
-statement_no_new_scope: comp_statement_no_new_scope { }
-          |    simple_statement	    { }
-	  ;
+statement_no_new_scope  : comp_statement_no_new_scope { }
+                        |    simple_statement	    { }
+	                    ;
 
-statement_w_scope: comp_statement_no_new_scope { }
-	  |    simple_statement     { }
-	  ;
+statement_w_scope       : comp_statement_no_new_scope { }
+	                    |    simple_statement     { }
+	                    ;
 
-simple_statement: declaration_statement { }
-	  |    expr_statement       { }
-	  |    select_statement     { }
-	  |    switch_statement     { }
-	  |    case_label	    { }
-	  |    iter_statement	    { }
-	  ;
+simple_statement        : declaration_statement { }
+	                    |    expr_statement       { }
+	                    |    select_statement     { }
+	                    |    switch_statement     { }
+	                    |    case_label	    { }
+	                    |    iter_statement	    { }
+	                    ;
 
-comp_statement_w_scope: '{' '}'     { }
-	  |    '{' statement_list '}' { }
-	  ;
+comp_statement_w_scope  : '{' '}'     { }
+	                    |    '{' statement_list '}' { }
+	                    ;
 
 comp_statement_no_new_scope: '{' '}' { } 
       |     '{' statement_list '}' { }
@@ -343,15 +439,9 @@ ext_declaration: func_def           { }
 func_def  :    func_proto comp_statement_no_new_scope { }
           ;
 
-DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
-          |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
+DeclList  :    DeclList decl        { ($$=$1)->Append($2); }
+          |    decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
-
-Decl      :    T_Void               { printf("TEST");$$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
-          ;
-          
-
-
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning

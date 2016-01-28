@@ -68,7 +68,12 @@ void CompoundExpr::PrintChildren(int indentLevel) {
    if (right) right->Print(indentLevel+1);
 }
    
-  
+VarExpr::VarExpr(yyltype loc, Identifier *ident) : Expr(loc) {
+  id = ident;
+}
+void VarExpr:: PrintChildren(int identLevel) {
+  id->Print(identLevel + 1);
+}
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this); 
     (subscript=s)->SetParent(this);
