@@ -41,11 +41,49 @@ void yyerror(const char *msg); // standard error-handling routine
 %union {
     int integerConstant;
     bool boolConstant;
-    char *stringConstant;
     float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
+    VarDecl *varD;
+    VarDeclError *varDE;
+    FnDecl *fnD;
+    FormalsError *formalsE;
     List<Decl*> *declList;
+    Stmt *stmt;
+    StmtBlock *stmtB;
+    SwitchLabel *switchL;
+    Default *def;
+    Case *c;
+    BreakStmt *breakS;
+    ConditionalStmt *conditionalS;
+    LoopStmt *loopS;
+    ForStmt *forS;
+    WhileStmt *whileS;
+    IfStmt *ifS;
+    IfStmtExprError *ifSEE;
+    SwitchStmt *switchS;
+    SwitchStmtError *switchSE;
+    Expr *expr;
+    LValue *lV;
+    FieldAccess *fieldA;
+    ArrayAccess *arrayA;
+    ExprError *exprE;
+    EmptyExpr *emptyE;
+    CompoundExpr *compoundE;
+    PostfixExpr *postfixE;
+    ArithmeticExpr *arithmeticE;
+    RelationalExpr *relationalE;
+    EqualityExpr *equalityE;
+    LogicalExpr *logicalE;
+    AssignExpr *assignE;
+    ReturnStmt *returnS;
+    Type *type;
+    ArrayType *arrayT;
+    NamedType *namedT;
+    Operator *op;
+    Error *error;
+    Program *program;
+    
 }
 
 
