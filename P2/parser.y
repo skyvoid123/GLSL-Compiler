@@ -84,7 +84,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Operator *op;
     Error *error;
     Program *program;
-    std::pair<Type*, Identifier*> *tup;
 }
 
 
@@ -291,8 +290,9 @@ func_declarator             :    func_hdr		    { }
 	                        |    func_hdr_w_param     { }
 	                        ;
     
-func_hdr_w_param            :    func_hdr param_declaration {  }
-	                        |    func_hdr_w_param ',' param_declaration { }
+func_hdr_w_param            :    func_hdr param_declaration { ($$=$1)->Append($2);  }
+	                        |    func_hdr_w_param ',' param_declaration { 
+					($$=$1)->Append($3); }
 	                        ;
 
 func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl(new Identifier(@1, $2), $1, 
