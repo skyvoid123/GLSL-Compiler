@@ -293,15 +293,15 @@ expr	                    :    assign_expr	    { }
 const_expr                  :    cond_expr	    { }
 	                        ;
 
-decl	                    :    func_proto ';'	    { }
-	                        |    init_declarator_list ';'{ }
+decl	                    :    func_proto ';'	    { $$=$1}
+	                        |    init_declarator_list ';'{$$=$1 }
 	                        ;
 
-func_proto                  :    func_declarator ')'     { }
+func_proto                  :    func_declarator ')'     { $$=$1}
 	                        ;
 
-func_declarator             :    func_hdr		    { }
-	                        |    func_hdr_w_param     { }
+func_declarator             :    func_hdr		    { $$=$1}
+	                        |    func_hdr_w_param     { $$=$1}
 	                        ;
     
 func_hdr_w_param            :    func_hdr param_declaration { ($$=$1)->Append($2);  }
