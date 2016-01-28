@@ -57,7 +57,7 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %token   T_Void T_Bool T_Int T_Float 
 %token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims
-%token   T_And T_Or, T_FieldSelection
+%token   T_And T_Or T_FieldSelection
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_Inc T_Dec T_Switch T_Case T_Default
 %token   T_Const T_Uniform T_Layout T_Continue T_Do T_In T_Out T_InOut
@@ -92,7 +92,7 @@ void yyerror(const char *msg); // standard error-handling routine
  * %% markers which delimit the Rules section.
 	 
  */
-Program   :    DeclList            { 
+Program   :    declList            { 
                                       @1; 
                                       /* pp2: The @1 is needed to convince 
                                        * yacc to set up yylloc. You can remove 
@@ -104,142 +104,142 @@ Program   :    DeclList            {
                                     }
           ;
 
-v_ident   :    T_Identifier	    { }
+v_ident             :    T_Identifier	    { }
 
-prim_expr	  :    v_ident		    { }
-	  |    T_IntConstant	    { }
-	  |    T_FloatConstant	    { }
-	  |    T_BoolConstant	    { }
-	  |    '(' expr ')'   { }
-	  ;
+prim_expr	        :    v_ident		    { }
+	                |    T_IntConstant	    { }
+	                |    T_FloatConstant	    { }
+	                |    T_BoolConstant	    { }
+	                |    '(' expr ')'   { }
+	                ;
 
-pfix_expr :    prim_expr	    { }
-	  |    pfix_expr '.' T_FieldSelection { }
-	  |    pfix_expr T_Inc	    { }
-	  |    pfix_expr T_Dec	    { }
-	  ;
+pfix_expr           :    prim_expr	    { }
+	                |    pfix_expr '.' T_FieldSelection { }
+	                |    pfix_expr T_Inc	    { }
+	                |    pfix_expr T_Dec	    { }
+	                ;
 
-int_expr  :    expr		    { }
-	  ;
+int_expr            :    expr		    { }
+	                ;
 
-func_ident:    type_spec	    { }
-	  |    pfix_expr	    { }
-	  ;
+func_ident          :    type_spec	    { }
+	                |    pfix_expr	    { }
+	                ;
 
-unary_expr:    pfix_expr	    { }
-	  |    T_Inc unary_expr     { }
-	  |    T_Dec unary_expr	    { }
-	  |    unary_op unary_expr  { }
-	  ;
+unary_expr          :    pfix_expr	    { }
+	                |    T_Inc unary_expr     { }
+	                |    T_Dec unary_expr	    { }
+	                |    unary_op unary_expr  { }
+	                ;
 
-unary_op  :    '+'		    { }
-	  |    '-'		    { }
-	  ;
+unary_op            :    '+'		    { }
+	                |    '-'		    { }
+	                ;
 
-multi_expr:    unary_expr	    { }
-	  |    multi_expr '*' unary_expr { }
-	  |    multi_expr '/' unary_expr { }
-	  ;
+multi_expr          :    unary_expr	    { }
+	                |    multi_expr '*' unary_expr { }
+	                |    multi_expr '/' unary_expr { }
+	                ;
 
-add_expr  :    multi_expr	    { }
-	  |    add_expr '+' multi_expr { }
-	  |    add_expr '-' multi_expr { }
-	  ;
+add_expr            :    multi_expr	    { }
+	                |    add_expr '+' multi_expr { }
+	                |    add_expr '-' multi_expr { }
+	                ;
 
-shift_expr:    add_expr		    { }
-	  ;
+shift_expr          :    add_expr		    { }
+	                ;
 
-rel_expr  :    shift_expr	    { }
-	  |    rel_expr '<' shift_expr { }
-	  |    rel_expr '>' shift_expr { }
-	  |    rel_expr T_LessEqual shift_expr    { }
-	  |    rel_expr T_GreaterEqual shift_expr { }
-	  ;
+rel_expr            :    shift_expr	    { }
+	                |    rel_expr '<' shift_expr { }
+	                |    rel_expr '>' shift_expr { }
+	                |    rel_expr T_LessEqual shift_expr    { }
+	                |    rel_expr T_GreaterEqual shift_expr { }
+	                ;
+    
+equal_expr          :    rel_expr		    { }
+	                |    equal_expr T_Equal rel_expr { }
+	                |    equal_expr T_NotEqual rel_expr { }
+	                ;
 
-equal_expr:    rel_expr		    { }
-	  |    equal_expr T_Equal rel_expr { }
-	  |    equal_expr T_NotEqual rel_expr { }
-	  ;
+and_expr            :    equal_expr	    { }
+	                ;
 
-and_expr  :    equal_expr	    { }
-	  ;
+excl_or_expr        :  and_expr		    { }
+	                ;
 
-excl_or_expr:  and_expr		    { }
-	  ;
+incl_or_expr        :  excl_or_expr	    { }
+	                ;
 
-incl_or_expr:  excl_or_expr	    { }
-	  ;
+logic_and_expr      : incl_or_expr { }
+	                |logic_and_expr T_And incl_or_expr { }
+	                ;
 
-logic_and_expr: incl_or_expr { }
-	      |logic_and_expr T_And incl_or_expr { }
-	      ;
+logic_xor_expr      :logic_and_expr { }
+                    ;
 
-logic_xor_expr:logic_and_expr { }
-              ;
+logic_or_expr       :logic_xor_expr { }
+                    |logic_or_expr T_Or logic_xor_expr { }
+                    ;
 
-logic_or_expr:logic_xor_expr { }
-             |logic_or_expr T_Or logic_xor_expr { }
-             ;
+cond_expr           : logic_or_expr { }
+	                ;
 
-cond_expr: logic_or_expr { }
-	 ;
+assign_expr         :   cond_expr { }
+	                |   unary_expr assign_op assign_expr { }
+	                ;
 
-assign_expr:   cond_expr { }
-	   |   unary_expr assign_op assign_expr { }
-	   ;
+assign_op           :    '=' 		    { }
+	                |    '*='		    { }
+	                |    '/='		    { }
+	                |    '+='		    { }
+	                |    '-='		    { }
+	                ;
 
-assign_op :    '=' 		    { }
-	  |    '*='		    { }
-	  |    '/='		    { }
-	  |    '+='		    { }
-	  |    '-='		    { }
-	  ;
+expr	            :    assign_expr	    { }
+                    ;
 
-expr	  :    assign_expr	    { }
-          ;
+const_expr          :    cond_expr	    { }
+	                ;
 
-const_expr:    cond_expr	    { }
-	  ;
+decl	            :    func_proto ';'	    { }
+	                |    init_declarator_list ';'{ }
+	                ;
 
-decl	  :    func_proto ';'	    { }
-	  |    init_declarator_list ';'{ }
-	  ;
+func_proto          :    func_declarator '('     { }
+	                ;
 
-func_proto:    func_declarator '('     { }
-	  ;
+func_declarator     :  func_hdr		    { }
+	                |    func_hdr_w_param     { }
+	                ;
 
-func_declarator:  func_hdr		    { }
-	  |    func_hdr_w_param     { }
-	  ;
+func_hdr_w_param    : func_hdr param_declaration { }
+	                |    func_hdr_w_param ',' param_declaration { }
+	                ;
 
-func_hdr_w_param: func_hdr param_declaration { }
-	  |    func_hdr_w_param ',' param_declaration { }
-	  ;
+func_hdr            :    fully_spec_type T_Identifier '(' { }
+	                ;
 
-func_hdr  :    fully_spec_type T_Identifier '(' { }
-	  ;
-
-param_declarator: type_spec T_Identifier { }
-      ;
+param_declarator    : type_spec T_Identifier { }
+                    ;
 
 param_declaration: param_declarator     { }
-	  |    param_type_spec	    { }
-	  ;
+	                |    param_type_spec	    { }
+	                ;
 
-param_type_spec: type_spec          { }
-	  ;
+param_type_spec     : type_spec          { }
+	                ;
 
 init_declarator_list: single_declaration   { }
-	  ;
+	                ;
 
-single_declaration: fully_spec_type T_Identifier { }
-	  ;
+single_declaration  : fully_spec_type T_Identifier { }
+	                ;
 
-fully_spec_type: type_spec          { }
-	  ;
+fully_spec_type     : type_spec          { }
+	                ;
 
-type_spec :    type_spec_nonarray   { }
-          ;
+type_spec           :    type_spec_nonarray   { }
+                    ;
 
 type_spec_nonarray: T_Void	    { }
 	  |    T_Float		    { }
@@ -347,7 +347,7 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
+Decl      :    T_Void               { printf("TEST");$$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
           ;
           
 
