@@ -45,12 +45,15 @@ void yyerror(const char *msg); // standard error-handling routine
     float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Identifier *ident;
+    pair<List<VarDecl*>*, List<Stmt*>*> *listTup;
+    pair<VarDecl*, Stmt*> *tup;
     Decl *decl;
     VarDecl *varD;
     VarDeclError *varDE;
     FnDecl *fnD;
     FormalsError *formalsE;
     List<Decl*> *declList;
+    List<Stmt*> *stmtList;
     Stmt *stmt;
     StmtBlock *stmtB;
     SwitchLabel *switchL;
@@ -155,10 +158,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <type>          type_spec_nonarray;
 %type <assignE>          init;
 %type <decl>          declaration_statement;
-%type <stmt>          statement;
-%type <stmt>          simple_statement;
+%type <tup>          statement;
+%type <tup>          simple_statement;
 %type <stmt>          comp_statement;
-%type <stmtB>          statement_list;
+%type <listTup>          statement_list;
 %type <expr>          expr_statement;
 %type <ifS>          select_statement;
 %type <ifS>          select_rest_statement;
@@ -293,7 +296,7 @@ func_declarator             :    func_hdr		    { $$=$1;}
     
 func_hdr_w_param            :    func_hdr param_declaration { ($$=$1)->Append($2);  }
 	                        |    func_hdr_w_param ',' param_declaration { 
-					($$=$1)->Append($3); }
+					                                        ($$=$1)->Append($3); }
 	                        ;
 
 func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl(new Identifier(@1, $2), $1, 
@@ -339,7 +342,7 @@ declaration_statement       : decl  { }
 statement                   :    simple_statement       { }
 	                        ;
 
-simple_statement            : declaration_statement { }
+simple_statement            : declaration_statement {$$ = new pair<VarDecl*, Stmt*>((VarDecl*)$1, NULL); }
 	                        |    expr_statement       { }
 	                        |    select_statement     { }
 	                        |    switch_statement     { }
@@ -347,12 +350,22 @@ simple_statement            : declaration_statement { }
 	                        |    iter_statement	    { }
 	                        ;
 
-comp_statement              : '{' '}'     {$$ = NULL; }
-	                        |    '{' statement_list '}' { }
+comp_statement              : '{' '}'     {$$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>); }
+	                        |    '{' statement_list '}' { $$ = new StmtBlock($2->first, $2->second); }
 	                        ;
 
-statement_list              : statement           { }
-                            | statement_list statement { }
+statement_list              : statement  {  if ($1->first == NULL)
+                                            ($$ = new pair<List<VarDecl*>*, List<Stmt*>*>
+                                            (new List<VarDecl*>, new List<Stmt*>))->second->Append($1->second); 
+                                        else
+                                            ($$ = new pair<List<VarDecl*>*, List<Stmt*>*>
+                                            (new List<VarDecl*>, new List<Stmt*>))->first->Append($1->first);
+                                        }
+                           
+                            | statement_list statement { if ($2->first == NULL)
+                                                            ($$ = $1)->second->Append($2->second);
+                                                        else
+                                                            ($$ = $1)->first->Append($2->first);}
 	                        ;
 
 expr_statement              : ';'	            { }
@@ -406,7 +419,7 @@ ext_declaration             :    func_def           { }
                             |    decl          { }
 	                        ;
 
-func_def                    :    func_proto comp_statement { if ($2 != NULL) $1->SetFunctionBody($2); }
+func_def                    :    func_proto comp_statement { $1->SetFunctionBody($2); }
                             ;
 
 %%
