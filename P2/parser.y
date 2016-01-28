@@ -120,7 +120,6 @@ void yyerror(const char *msg); // standard error-handling routine
  * of the union named "declList" which is of type List<Decl*>.
  * pp2: You'll need to add many of these of your own.
  */
-%type <declList>  DeclList 
 %type <identifier>	  v_ident;
 %type <expr>	  prim_expr;
 %type <postfixE>	  pfix_expr;
@@ -160,11 +159,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignE>          init;
 %type <decl>          declaration_statement;
 %type <stmt>          statement;
-%type <stmt>          statement_no_new_scope;
-%type <stmt>          statement_w_scope;
 %type <stmt>          simple_statement;
-%type <stmt>          comp_statement_w_scope;
-%type <stmt>          comp_statement_no_new_scope;
+%type <stmt>          comp_statement;
 %type <stmtB>          statement_list;
 %type <expr>          expr_statement;
 %type <ifS>          select_statement;
@@ -177,7 +173,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <forS>          for_init_statement;
 %type <conditionalS>          condopt;
 %type <forS>          for_rest_statement;
-%type <stmt>          trans_unit;
+%type <declList>          trans_unit;
 %type <decl>          ext_declaration;
 %type <fnD>          func_def;
 
@@ -188,7 +184,7 @@ void yyerror(const char *msg); // standard error-handling routine
  * %% markers which delimit the Rules section.
 	 
  */
-Program                     :    DeclList            { 
+Program                     :    trans_unit            { 
                                       @1; 
                                       /* pp2: The @1 is needed to convince 
                                        * yacc to set up yylloc. You can remove 
@@ -301,25 +297,24 @@ decl	                    :    func_proto ';'	    { }
 	                        |    init_declarator_list ';'{ }
 	                        ;
 
-func_proto                  :    func_declarator '('     { }
+func_proto                  :    func_declarator ')'     { }
 	                        ;
 
 func_declarator             :    func_hdr		    { }
 	                        |    func_hdr_w_param     { }
 	                        ;
     
-func_hdr_w_param            :    func_hdr param_declaration { }
+func_hdr_w_param            :    func_hdr param_declaration {  }
 	                        |    func_hdr_w_param ',' param_declaration { }
 	                        ;
 
-func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl( new Identifier(yylloc, $2), $1, NULL); }
+func_hdr                    :    fully_spec_type T_Identifier '(' { $$ = new FnDecl( new Identifier(yylloc, $2), $1, new List<VarDecl*>); }
 	                        ;
 
-param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(yylloc, $2), $1); }
+param_declarator            :    type_spec T_Identifier {$$ = new VarDecl(new Identifier(@1, $2), $1); }
                             ;
 
 param_declaration           :    param_declarator     { $$ = $1; }
-	                        |    param_type_spec	    { $$ = new VarDecl(NULL, $1); }
 	                        ;
 
 param_type_spec             :    type_spec          { $$ = $1;}
@@ -328,7 +323,7 @@ param_type_spec             :    type_spec          { $$ = $1;}
 init_declarator_list        :    single_declaration   { $$ = $1; }
 	                        ;
 
-single_declaration          :    fully_spec_type T_Identifier { $$ = new VarDecl(new Identifier(yylloc, $2), $1); }
+single_declaration          :    fully_spec_type T_Identifier { $$ = new VarDecl(new Identifier(@1, $2), $1); }
 	                        ;
 
 fully_spec_type             :    type_spec          { $$ = $1; }
@@ -338,8 +333,9 @@ type_spec                   :    type_spec_nonarray   { $$ = $1; }
                             ;
 
 type_spec_nonarray          :    T_Void	    { $$ = Type::voidType; }
-	                        |    T_Float    { $$ = Type::floatType; }
-	                        |    T_Int	    { $$ = Type::intType; }
+                            |    T_Bool     { $$ = Type::boolType; }
+	                        |    T_Float    { $$ = Type::floatType;}
+	                        |    T_Int	    { $$ = Type::intType;  }
 	                        |    T_Vec2		{ $$ = Type::vec2Type; }
 	                        |    T_Vec3		{ $$ = Type::vec3Type; }
 	                        |    T_Vec4		{ $$ = Type::vec4Type; }
@@ -354,16 +350,7 @@ init                        :    assign_expr	    { }
 declaration_statement       : decl  { }
 	                        ;
 
-statement                   :    comp_statement_w_scope { }
-                            |    simple_statement       { }
-	                        ;
-
-statement_no_new_scope      : comp_statement_no_new_scope { }
-                            |    simple_statement	    { }
-	                        ;
-
-statement_w_scope           : comp_statement_no_new_scope { }
-	                        |    simple_statement     { }
+statement                   :    simple_statement       { }
 	                        ;
 
 simple_statement            : declaration_statement { }
@@ -374,16 +361,12 @@ simple_statement            : declaration_statement { }
 	                        |    iter_statement	    { }
 	                        ;
 
-comp_statement_w_scope      : '{' '}'     { }
+comp_statement              : '{' '}'     {$$ = Stmt(@2); }
 	                        |    '{' statement_list '}' { }
 	                        ;
 
-comp_statement_no_new_scope : '{' '}' { } 
-                            |     '{' statement_list '}' { }
-                            ;
-
 statement_list              : statement           { }
-                            |    statement_list statement { }
+                            | statement_list statement { }
 	                        ;
 
 expr_statement              : ';'	            { }
@@ -393,8 +376,8 @@ expr_statement              : ';'	            { }
 select_statement            : T_If '(' expr ')' select_rest_statement { }
 	                        ;
 
-select_rest_statement       : statement_w_scope T_Else statement_w_scope { }
-	                        |    statement_w_scope    { }
+select_rest_statement       : statement T_Else statement { }
+	                        |    statement    { }
 	                        ;
 
 cond                        :    expr	 	    { }
@@ -412,9 +395,9 @@ case_label                  :    T_Case expr ':'      { }
 	                        |    T_Default ':'        { }
 	                        ;
 
-iter_statement              : T_While '(' cond ')' statement_no_new_scope { }
+iter_statement              : T_While '(' cond ')' statement { }
 	                        |    T_For '(' for_init_statement for_rest_statement ')'
-			                                statement_no_new_scope { }
+			                                statement { }
 	                        ;
 
 for_init_statement          : expr_statement  { }
@@ -425,23 +408,21 @@ condopt                     :    cond	            { }
 	                        |    	                    { }
 	                        ;
 
-for_rest_statement          : condopt ';'     { }
+for_rest_statement          :    condopt ';'     { }
 	                        |    condopt ';' expr	    { }
 	                        ;
 
-trans_unit                  :    ext_declaration      { }
-	                        |    trans_unit ext_declaration { }
+trans_unit                  :    ext_declaration      { ($$ = new List<Decl*>)->Append($1); }
+	                        |    trans_unit ext_declaration { ($$=$1)->Append($2); }
+                            ;
 
-ext_declaration             : func_def           { }
+ext_declaration             :    func_def           { }
                             |    decl          { }
 	                        ;
 
-func_def                    :    func_proto comp_statement_no_new_scope { }
+func_def                    :    func_proto comp_statement { $1->SetFunctionBody($2); }
                             ;
 
-DeclList                    :    DeclList decl        { ($$=$1)->Append($2); }
-                            |    decl                 { ($$ = new List<Decl*>)->Append($1); }
-                            ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
