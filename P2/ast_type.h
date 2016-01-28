@@ -19,8 +19,8 @@ class Type : public Node
     char *typeName;
 
   public :
-    static Type *intType, *doubleType, *boolType, *voidType,
-                *nullType, *stringType, *errorType;
+    static Type *intType, *boolType, *voidType, *errorType, *vec2Type,
+		*vec3Type, *vec4Type, *mat2Type, *mat3Type, *mat4Type;
 
     Type(yyltype loc) : Node(loc) {}
     Type(const char *str);
@@ -31,6 +31,7 @@ class Type : public Node
 
 class NamedType : public Type 
 {
+
   protected:
     Identifier *id;
     
