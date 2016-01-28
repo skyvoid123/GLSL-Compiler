@@ -95,7 +95,7 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %token   T_Void T_Bool T_Int T_Float 
 %token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims
-%token   T_And T_Or, T_FieldSelection
+%token   T_And T_Or T_FieldSelection
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_Inc T_Dec T_Switch T_Case T_Default
 %token   T_Const T_Uniform T_Layout T_Continue T_Do T_In T_Out T_InOut
@@ -121,7 +121,65 @@ void yyerror(const char *msg); // standard error-handling routine
  * pp2: You'll need to add many of these of your own.
  */
 %type <declList>  DeclList 
-%type <decl>      Decl
+%type <identifier>	  v_ident;
+%type <expr>	  prim_expr;
+%type <postfixE>	  pfix_expr;
+%type <expr>  int_expr;
+%type <identifier>	  func_ident;
+%type <expr>          unary_expr;
+%type <op>          unary_op;
+%type <arithmeticE>          multi_expr;
+%type <arithmeticE>          add_expr;
+%type <expr>          shift_expr;
+%type <relationalE>          rel_expr;
+%type <equalityE>          equal_expr;
+%type <logicalE>          and_expr;
+%type <logicalE>          excl_or_expr;
+%type <logicalE>          incl_or_expr;
+%type <logicalE>          logic_and_expr;
+%type <logicalE>          logic_xor_expr;
+%type <logicalE>          logic_or_expr;
+%type <logicalE>          cond_expr;
+%type <assignE>          assign_expr;
+%type <op>          assign_op;
+%type <expr>          expr;
+%type <expr>          const_expr;
+%type <decl>          decl;
+%type <fnD>          func_proto;
+%type <fnD>          func_declarator;
+%type <fnD>          func_hdr_w_param;
+%type <fnD>          func_hdr;
+%type <varD>          param_declarator;
+%type <varD>          param_declaration;
+%type <type>          param_type_spec;
+%type <decl>          init_declarator_list;
+%type <decl>          single_declaration;
+%type <type>          fully_spec_type;
+%type <type>          type_spec;
+%type <type>          type_spec_nonarray;
+%type <assignE>          init;
+%type <decl>          declaration_statement;
+%type <stmt>          statement;
+%type <stmt>          statement_no_new_scope;
+%type <stmt>          statement_w_scope;
+%type <stmt>          simple_statement;
+%type <stmt>          comp_statement_w_scope;
+%type <stmt>          comp_statement_no_new_scope;
+%type <stmtB>          statement_list;
+%type <expr>          expr_statement;
+%type <ifS>          select_statement;
+%type <ifS>          select_rest_statement;
+%type <conditionalS>          cond;
+%type <switchS>          switch_statement;
+%type <switchS>          switch_statement_list;
+%type <switchL>          case_label;
+%type <loopS>          iter_statement;
+%type <forS>          for_init_statement;
+%type <conditionalS>          condopt;
+%type <forS>          for_rest_statement;
+%type <stmt>          trans_unit;
+%type <decl>          ext_declaration;
+%type <fnD>          func_def;
 
 %%
 /* Rules
@@ -381,11 +439,10 @@ ext_declaration: func_def           { }
 func_def  :    func_proto comp_statement_no_new_scope { }
           ;
 
-DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
-          |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
+DeclList  :    DeclList decl        { ($$=$1)->Append($2); }
+          |    decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
           ;
           
 
