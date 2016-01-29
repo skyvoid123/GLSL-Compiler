@@ -205,13 +205,13 @@ prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); }
 	                        |    '(' expr ')'   {  }
 	                        ;
 
-pfix_expr                   :    prim_expr	    { $$ = new PostfixExpr($1, NULL); }
+pfix_expr                   :    prim_expr	    { $$ = (PostfixExpr*)$1; }
 	                        |    pfix_expr '.' T_FieldSelection { }
 	                        |    pfix_expr T_Inc	    { $$ = new PostfixExpr($1, new Operator(@2, "++") ); }
 	                        |    pfix_expr T_Dec	    { $$ = new PostfixExpr($1, new Operator(@2, "--") ); }
 	                        ;
     
-unary_expr                  :    pfix_expr	    { }
+unary_expr                  :    pfix_expr	    {$$ = (ArithmeticExpr*)$1; }
 	                        |    T_Inc unary_expr     { $$ = new ArithmeticExpr(new Operator(@1, "++"), $2); }
 	                        |    T_Dec unary_expr	    { $$ = new ArithmeticExpr(new Operator(@1, "--"), $2);  }
 	                        |    unary_op unary_expr  { $$ = new ArithmeticExpr($1, $2); }
@@ -234,19 +234,19 @@ add_expr                    :    multi_expr	    { $$ = $1;}
 shift_expr                  :    add_expr		    { $$ = $1; }
 	                        ;
 
-rel_expr                    :    shift_expr	    { $$ = new RelationalExpr($1->getLeft(), $1->getOp(), $1->getRight() );  }
+rel_expr                    :    shift_expr	    { $$ = (RelationalExpr*)$1; }
 	                        |    rel_expr '<' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, "<"), $3); }
 	                        |    rel_expr '>' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">"), $3); }
 	                        |    rel_expr T_LessEqual shift_expr    { $$ = new RelationalExpr($1, new Operator(@2, "<="), $3); }
 	                        |    rel_expr T_GreaterEqual shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">="), $3); }
 	                        ;
         
-equal_expr                  :    rel_expr		    { $$ = new EqualityExpr($1->getLeft(), $1->getOp(), $1->getRight() ); }
+equal_expr                  :    rel_expr		    { $$ = (EqualityExpr*)$1; }
 	                        |    equal_expr T_Equal rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "=="), $3); }
 	                        |    equal_expr T_NotEqual rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "!="), $3); }
 	                        ;
 
-and_expr                    :    equal_expr	    { $$ = new LogicalExpr($1->getLeft(), $1->getOp(), $1->getRight() ); }
+and_expr                    :    equal_expr	    { $$ = (LogicalExpr*)$1; }
 	                        ;
 
 excl_or_expr                :    and_expr		    { $$=$1;}
@@ -269,7 +269,7 @@ logic_or_expr               :    logic_xor_expr { $$=$1; }
 cond_expr                   :    logic_or_expr { $$=$1;}
 	                        ;
 
-assign_expr                 :    cond_expr { $$ = new AssignExpr($1->getLeft(), $1->getOp(), $1->getRight()); }
+assign_expr                 :    cond_expr { $$ = (AssignExpr*)$1; }
 	                        |    unary_expr assign_op assign_expr { $$ = new AssignExpr($1, $2, $3); }
 	                        ;
 
@@ -343,7 +343,7 @@ statement                   :    simple_statement       { }
 	                        ;
 
 simple_statement            : declaration_statement {$$ = new pair<VarDecl*, Stmt*>((VarDecl*)$1, NULL); }
-	                        |    expr_statement       { }
+	                        |    expr_statement     {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        |    select_statement     { }
 	                        |    switch_statement     { }
 	                        |    case_label	    { }
@@ -369,7 +369,7 @@ statement_list              : statement  {  if ($1->first == NULL)
 	                        ;
 
 expr_statement              : ';'	            { }
-	                        |    expr ';'	            { }
+	                        |    expr ';'	            { $$ = $1; }
 	                        ;
 
 select_statement            : T_If '(' expr ')' select_rest_statement { }
