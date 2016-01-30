@@ -131,6 +131,10 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "[]"                { return T_Dims;        }
 "++"                { return T_Inc;         }
 "--"                { return T_Dec;         }
+"+="                { return T_AddE;        }
+"-="                { return T_SubE;        }
+"*="                { return T_MulE;        }
+"/="                { return T_DivE;        }
 {OPERATOR}          { return yytext[0];     }
 
  /* -------------------- Constants ------------------------------ */
