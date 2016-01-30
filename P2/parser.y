@@ -126,22 +126,22 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %type <ident>	  v_ident;
 %type <expr>	  prim_expr;
-%type <postfixE>	  pfix_expr;
-%type <arithmeticE>          unary_expr;
+%type <expr>	  pfix_expr;
+%type <expr>          unary_expr;
 %type <op>          unary_op;
-%type <arithmeticE>          multi_expr;
-%type <arithmeticE>          add_expr;
-%type <arithmeticE>          shift_expr;
-%type <relationalE>          rel_expr;
-%type <equalityE>          equal_expr;
-%type <logicalE>          and_expr;
-%type <logicalE>          excl_or_expr;
-%type <logicalE>          incl_or_expr;
-%type <logicalE>          logic_and_expr;
-%type <logicalE>          logic_xor_expr;
-%type <logicalE>          logic_or_expr;
-%type <logicalE>          cond_expr;
-%type <assignE>          assign_expr;
+%type <expr>          multi_expr;
+%type <expr>          add_expr;
+%type <expr>          shift_expr;
+%type <expr>          rel_expr;
+%type <expr>          equal_expr;
+%type <expr>          and_expr;
+%type <expr>          excl_or_expr;
+%type <expr>          incl_or_expr;
+%type <expr>          logic_and_expr;
+%type <expr>          logic_xor_expr;
+%type <expr>          logic_or_expr;
+%type <expr>          cond_expr;
+%type <expr>          assign_expr;
 %type <op>          assign_op;
 %type <expr>          expr;
 %type <decl>          decl;
@@ -205,13 +205,13 @@ prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); }
 	                        |    '(' expr ')'   {  }
 	                        ;
 
-pfix_expr                   :    prim_expr	    { $$ = (PostfixExpr*)$1; }
+pfix_expr                   :    prim_expr	    { $$ = $1; }
 	                        |    pfix_expr '.' T_FieldSelection { }
 	                        |    pfix_expr T_Inc	    { $$ = new PostfixExpr($1, new Operator(@2, "++") ); }
 	                        |    pfix_expr T_Dec	    { $$ = new PostfixExpr($1, new Operator(@2, "--") ); }
 	                        ;
     
-unary_expr                  :    pfix_expr	    {$$ = (ArithmeticExpr*)$1; }
+unary_expr                  :    pfix_expr	    {$$ = $1; }
 	                        |    T_Inc unary_expr     { $$ = new ArithmeticExpr(new Operator(@1, "++"), $2); }
 	                        |    T_Dec unary_expr	    { $$ = new ArithmeticExpr(new Operator(@1, "--"), $2);  }
 	                        |    unary_op unary_expr  { $$ = new ArithmeticExpr($1, $2); }
@@ -228,25 +228,25 @@ multi_expr                  :    unary_expr	    { $$ = $1; }
     
 add_expr                    :    multi_expr	    { $$ = $1;}
 	                        |    add_expr '+' multi_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3); }
-	                        |    add_expr '-' multi_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3); }
+	                        |    add_expr '-' multi_expr { $$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3); }
 	                        ;
     
 shift_expr                  :    add_expr		    { $$ = $1; }
 	                        ;
 
-rel_expr                    :    shift_expr	    { $$ = (RelationalExpr*)$1; }
+rel_expr                    :    shift_expr	    { $$ = $1; }
 	                        |    rel_expr '<' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, "<"), $3); }
 	                        |    rel_expr '>' shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">"), $3); }
 	                        |    rel_expr T_LessEqual shift_expr    { $$ = new RelationalExpr($1, new Operator(@2, "<="), $3); }
 	                        |    rel_expr T_GreaterEqual shift_expr { $$ = new RelationalExpr($1, new Operator(@2, ">="), $3); }
 	                        ;
         
-equal_expr                  :    rel_expr		    { $$ = (EqualityExpr*)$1; }
+equal_expr                  :    rel_expr		    { $$ = $1; }
 	                        |    equal_expr T_Equal rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "=="), $3); }
 	                        |    equal_expr T_NotEqual rel_expr { $$ = new EqualityExpr($1, new Operator(@2, "!="), $3); }
 	                        ;
 
-and_expr                    :    equal_expr	    { $$ = (LogicalExpr*)$1; }
+and_expr                    :    equal_expr	    { $$ = $1; }
 	                        ;
 
 excl_or_expr                :    and_expr		    { $$=$1;}
@@ -269,7 +269,7 @@ logic_or_expr               :    logic_xor_expr { $$=$1; }
 cond_expr                   :    logic_or_expr { $$=$1;}
 	                        ;
 
-assign_expr                 :    cond_expr { $$ = (AssignExpr*)$1; }
+assign_expr                 :    cond_expr { $$ = $1; }
 	                        |    unary_expr assign_op assign_expr { $$ = new AssignExpr($1, $2, $3); }
 	                        ;
 
