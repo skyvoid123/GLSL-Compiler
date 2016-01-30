@@ -274,10 +274,10 @@ assign_expr                 :    cond_expr { $$ = $1; }
 	                        ;
 
 assign_op                   :    '=' 		    { $$ = new Operator(@1, "="); }
-	                        |    '*='		    { $$ = new Operator(@1, "*="); }
-	                        |    '/='		    { $$ = new Operator(@1, "/="); }
-	                        |    '+='		    { $$ = new Operator(@1, "+="); }
-	                        |    '-='		    { $$ = new Operator(@1, "-="); }
+	                        |    T_MulE		    { $$ = new Operator(@1, "*="); }
+	                        |    T_DivE		    { $$ = new Operator(@1, "/="); }
+	                        |    T_PlusE		    { $$ = new Operator(@1, "+="); }
+	                        |    T_SubE		    { $$ = new Operator(@1, "-="); }
 	                        ;
 
 expr	                    :    assign_expr	    { $$ = $1; }
