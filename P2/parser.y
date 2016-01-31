@@ -47,6 +47,8 @@ void yyerror(const char *msg); // standard error-handling routine
     Identifier *ident;
     pair<List<VarDecl*>*, List<Stmt*>*> *listTup;
     pair<VarDecl*, Stmt*> *tup;
+    pair<Stmt*, Stmt*> *stmtPair;
+    pair<Expr*, Expr*> *exprPair;
     Decl *decl;
     VarDecl *varD;
     VarDeclError *varDE;
@@ -165,15 +167,15 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <listTup>          statement_list;
 %type <expr>          expr_statement;
 %type <ifS>          select_statement;
-%type <ifS>          select_rest_statement;
-%type <conditionalS>          cond;
+%type <stmtPair>          select_rest_statement;
+%type <expr>          cond;
 %type <switchS>          switch_statement;
 %type <switchS>          switch_statement_list;
 %type <switchL>          case_label;
 %type <loopS>          iter_statement;
-%type <forS>          for_init_statement;
-%type <conditionalS>          condopt;
-%type <forS>          for_rest_statement;
+%type <expr>          for_init_statement;
+%type <expr>          condopt;
+%type <exprPair>          for_rest_statement;
 %type <declList>          trans_unit;
 %type <decl>          ext_declaration;
 %type <fnD>          func_def;
@@ -199,7 +201,7 @@ Program                     :    trans_unit            {
 
 v_ident                     :    T_Identifier	    { $$ = new Identifier(@1, $1); }
 
-prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); }
+prim_expr	                :    v_ident		    { $$ = new FieldAccess(NULL, $1); } /* Don't forget to change*/
 	                        |    T_IntConstant	    { $$ = new IntConstant(@1, $1); }
 	                        |    T_FloatConstant	    { $$ = new FloatConstant(@1, $1); }
 	                        |    T_BoolConstant	    { $$ = new BoolConstant(@1, $1); }
@@ -341,14 +343,15 @@ declaration_statement       : decl  { }
 	                        ;
 
 statement                   :    simple_statement       { }
+                            |    comp_statement         {$$ = new pair<VarDecl*, Stmt*>(NULL, $1); }
 	                        ;
 
 simple_statement            : declaration_statement {$$ = new pair<VarDecl*, Stmt*>((VarDecl*)$1, NULL); }
 	                        |    expr_statement     {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
-	                        |    select_statement     { }
+	                        |    select_statement   {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        |    switch_statement     { }
 	                        |    case_label	    { }
-	                        |    iter_statement	    { }
+	                        |    iter_statement	    {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        ;
 
 comp_statement              : '{' '}'     {$$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>); }
@@ -373,11 +376,11 @@ expr_statement              : ';'	            { }
 	                        |    expr ';'	            { $$ = $1; }
 	                        ;
 
-select_statement            : T_If '(' expr ')' select_rest_statement { }
+select_statement            : T_If '(' expr ')' select_rest_statement { $$ = new IfStmt($3, $5->first, $5->second); }
 	                        ;
 
-select_rest_statement       : statement T_Else statement { }
-	                        |    statement    { }
+select_rest_statement       : statement T_Else statement {$$ = new pair<Stmt*, Stmt*>($1->second,$3->second); }
+	                        |    statement    {$$ = new pair<Stmt*, Stmt*>($1->second, NULL); }
 	                        ;
 
 cond                        :    expr	 	    { }
@@ -395,21 +398,21 @@ case_label                  :    T_Case expr ':'      { }
 	                        |    T_Default ':'        { }
 	                        ;
 
-iter_statement              : T_While '(' cond ')' statement { }
+iter_statement              : T_While '(' cond ')' statement {$$ = new WhileStmt($3, $5->second); }
 	                        |    T_For '(' for_init_statement for_rest_statement ')'
-			                                statement { }
+			                                statement {$$ = new ForStmt($3, $4->first, $4->second, $6->second); }
 	                        ;
 
-for_init_statement          : expr_statement  { }
+for_init_statement          :    expr_statement  { }
 	                        |    declaration_statement { }
 	                        ;
 
 condopt                     :    cond	            { }
-	                        |    	                    { }
+	                        |    	                { }
 	                        ;
 
-for_rest_statement          :    condopt ';'     { }
-	                        |    condopt ';' expr	    { }
+for_rest_statement          :    condopt ';'     {$$ = new pair<Expr*, Expr*>($1, NULL); }
+	                        |    condopt ';' expr	    {$$ = new pair<Expr*, Expr*>($1, $3); }
 	                        ;
 
 trans_unit                  :    ext_declaration      { ($$ = new List<Decl*>)->Append($1); }

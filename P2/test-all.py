@@ -22,7 +22,7 @@ TEST_DIRECTORY = 'samples'
 
 for _, _, files in os.walk(TEST_DIRECTORY):
   for file in files:
-    if not (file.endswith('.decaf') or file.endswith('.frag')):
+    if not (file.endswith('.glsl') or file.endswith('.frag')):
       continue
     refName = os.path.join(TEST_DIRECTORY, '%s.out' % file.split('.')[0])
     testName = os.path.join(TEST_DIRECTORY, file)
