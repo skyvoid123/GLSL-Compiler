@@ -14,18 +14,18 @@
                Type: vec2
   8            Identifier: b
   9         AssignExpr: 
-  9            FieldAccess: 
+  9            VarExpr: 
   9               Identifier: a
   9            Operator: =
   9            FieldAccess: 
-  9               FieldAccess: 
+  9               VarExpr: 
   9                  Identifier: myVar
   9               Identifier: xy
  10         AssignExpr: 
- 10            FieldAccess: 
+ 10            VarExpr: 
  10               Identifier: b
  10            Operator: =
  10            FieldAccess: 
- 10               FieldAccess: 
+ 10               VarExpr: 
  10                  Identifier: myVar
  10               Identifier: xz

@@ -1,6 +1,8 @@
 #!/bin/bash
 make clean
 make
+rightcount=0
+totalcount=0
 for f in samples/*.glsl
 do
     echo "Checking File $f"
@@ -11,11 +13,15 @@ do
         echo "$filename is correct"
         rm samples/$filename.diff
         rm samples/$filename.output
+        ((rightcount+=1))
+        ((totalcount+=1))
         echo
     else
         echo "$filename is incorrect"
         rm samples/$filename.diff
         rm samples/$filename.output
+        ((totalcount+=1))
         echo
     fi
 done
+echo "Passed $rightcount out of $totalcount"
