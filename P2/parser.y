@@ -170,8 +170,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmtPair>          select_rest_statement;
 %type <expr>          cond;
 %type <switchS>          switch_statement;
-%type <switchS>          switch_statement_list;
+%type <listTup>          switch_statement_list;
 %type <switchL>          case_label;
+%type <def>          default_label;
 %type <loopS>          iter_statement;
 %type <expr>          for_init_statement;
 %type <expr>          condopt;
@@ -201,7 +202,7 @@ Program                     :    trans_unit            {
 
 v_ident                     :    T_Identifier	    { $$ = new Identifier(@1, $1); }
 
-prim_expr	                :    v_ident		    { $$ = new FieldAccess(NULL, $1); } /* Don't forget to change*/
+prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); } /* Don't forget to change*/
 	                        |    T_IntConstant	    { $$ = new IntConstant(@1, $1); }
 	                        |    T_FloatConstant	    { $$ = new FloatConstant(@1, $1); }
 	                        |    T_BoolConstant	    { $$ = new BoolConstant(@1, $1); }
@@ -349,8 +350,8 @@ statement                   :    simple_statement       { }
 simple_statement            : declaration_statement {$$ = new pair<VarDecl*, Stmt*>((VarDecl*)$1, NULL); }
 	                        |    expr_statement     {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        |    select_statement   {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
-	                        |    switch_statement     { }
-	                        |    case_label	    { }
+	                        |    switch_statement   {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
+	                        |    case_label	        {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        |    iter_statement	    {$$ = new pair<VarDecl*, Stmt*>(NULL, (Stmt*) $1); }
 	                        ;
 
@@ -387,16 +388,23 @@ cond                        :    expr	 	    { }
 	                        |    fully_spec_type T_Identifier '=' init { }
 	                        ;
 
-switch_statement            : T_Switch '(' expr ')' '{' switch_statement_list '}' { }
+switch_statement            : T_Switch '(' expr ')' '{' switch_statement_list default_label '}' {$$ = new SwitchStmt($3, (List<Case*>*)$6->second, $7); }
 	                        ;
 
 switch_statement_list       : { }
 	                        | statement_list { }
 	                        ;
 
-case_label                  :    T_Case expr ':'      { }
-	                        |    T_Default ':'        { }
-	                        ;
+
+case_label                  :       T_Case expr ':' statement  { List<Stmt*> *test = new List<Stmt*>();
+                                                                 test->Append($4->second);
+                                                                 $$ = new Case((IntConstant*)$2,test) ; }
+                            ;
+
+default_label               :    T_Default ':' statement      { List<Stmt*> *test = new List<Stmt*>();
+                                                                test->Append($3->second);
+                                                                $$ = new Default(test); }
+                            ;
 
 iter_statement              : T_While '(' cond ')' statement {$$ = new WhileStmt($3, $5->second); }
 	                        |    T_For '(' for_init_statement for_rest_statement ')'

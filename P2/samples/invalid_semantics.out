@@ -17,7 +17,7 @@
  10               BoolConstant: true
                (then) StmtBlock: 
  11               ArithmeticExpr: 
- 11                  FieldAccess: 
+ 11                  VarExpr: 
  11                     Identifier: b
  11                  Operator: +
  11                  IntConstant: 4
