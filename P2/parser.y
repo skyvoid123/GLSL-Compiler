@@ -20,6 +20,8 @@
 #include "parser.h"
 #include "errors.h"
 #include <utility>
+#include <stdio.h>
+#include <string.h>
 
 void yyerror(const char *msg); // standard error-handling routine
 
