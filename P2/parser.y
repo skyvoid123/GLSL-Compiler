@@ -44,6 +44,7 @@ void yyerror(const char *msg); // standard error-handling routine
     bool boolConstant;
     float floatConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
+    char fieldSelection[MaxIdentLen+1];
     Identifier *ident;
     pair<List<VarDecl*>*, List<Stmt*>*> *listTup;
     pair<VarDecl*, Stmt*> *tup;
@@ -101,7 +102,7 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %token   T_Void T_Bool T_Int T_Float 
 %token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims
-%token   T_And T_Or T_FieldSelection
+%token   T_And T_Or
 %token   T_While T_For T_If T_Else T_Return T_Break
 %token   T_Inc T_Dec T_Switch T_Case T_Default
 %token   T_Const T_Uniform T_Layout T_Continue T_Do T_In T_Out T_InOut
@@ -110,6 +111,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   T_UVec2 T_UVec3 T_UVec4 T_UInt T_Struct
 %token   T_AddE T_SubE T_MulE T_DivE
 
+%token   <fieldSelection> T_FieldSelection
 %token   <identifier> T_Identifier
 %token   <integerConstant> T_IntConstant
 %token   <floatConstant> T_FloatConstant
@@ -201,7 +203,7 @@ Program                     :    trans_unit            {
 
 v_ident                     :    T_Identifier	    { $$ = new Identifier(@1, $1); }
 
-prim_expr	                :    v_ident		    { $$ = new FieldAccess(NULL, $1); } /* Don't forget to change*/
+prim_expr	                :    v_ident		    { $$ = new VarExpr(@1, $1); } /* Don't forget to change*/
 	                        |    T_IntConstant	    { $$ = new IntConstant(@1, $1); }
 	                        |    T_FloatConstant	    { $$ = new FloatConstant(@1, $1); }
 	                        |    T_BoolConstant	    { $$ = new BoolConstant(@1, $1); }
@@ -209,7 +211,7 @@ prim_expr	                :    v_ident		    { $$ = new FieldAccess(NULL, $1); } 
 	                        ;
 
 pfix_expr                   :    prim_expr	    { $$ = $1; }
-	                        |    pfix_expr '.' T_FieldSelection { }
+	                        |    pfix_expr T_FieldSelection { $$ = new FieldAccess( $1, new Identifier(@2, $2) ); }
 	                        |    pfix_expr T_Inc	    { $$ = new PostfixExpr($1, new Operator(@2, "++") ); }
 	                        |    pfix_expr T_Dec	    { $$ = new PostfixExpr($1, new Operator(@2, "--") ); }
 	                        ;

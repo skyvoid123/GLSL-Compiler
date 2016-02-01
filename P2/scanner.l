@@ -50,6 +50,7 @@ INTEGER           ({DIGIT}+)
 EXPONENT          ([Ee][-+]?{INTEGER})
 FLOAT             ({INTEGER}"."{DIGIT}*[fF]?)
 IDENTIFIER        ([a-zA-Z][a-zA-Z_0-9]*)
+FIELD_SELECTION   ("."{IDENTIFIER})
 OPERATOR          ([-+/*%=.,;!<>()[\]{}:])
 BEG_COMMENT       ("/*")
 END_COMMENT       ("*/")
@@ -155,7 +156,12 @@ SINGLE_COMMENT    ("//"[^\n]*)
                        yylval.identifier[MaxIdentLen] = '\0';
                        return T_Identifier; }
 
-
+{FIELD_SELECTION}   { if (strlen(yytext) > MaxIdentLen)
+                         ReportError::LongIdentifier(&yylloc, yytext);
+                       strncpy(yylval.fieldSelection, yytext+1, MaxIdentLen);
+                       printf("%s\n", yytext+1);
+                       yylval.fieldSelection[MaxIdentLen] = '\0';
+                       return T_FieldSelection; }
  /* -------------------- Default rule (error) -------------------- */
 .                   { ReportError::UnrecogChar(&yylloc, yytext[0]); }
 
