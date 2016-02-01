@@ -159,7 +159,6 @@ SINGLE_COMMENT    ("//"[^\n]*)
 {FIELD_SELECTION}   { if (strlen(yytext) > MaxIdentLen)
                          ReportError::LongIdentifier(&yylloc, yytext);
                        strncpy(yylval.fieldSelection, yytext+1, MaxIdentLen);
-                       printf("%s\n", yytext+1);
                        yylval.fieldSelection[MaxIdentLen] = '\0';
                        return T_FieldSelection; }
  /* -------------------- Default rule (error) -------------------- */
