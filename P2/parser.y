@@ -393,7 +393,8 @@ cond                        :    expr	 	    { }
 	                        ;
 
 switch_statement            : T_Switch '(' expr ')' '{' switch_statement_list default_label '}' {$$ = new SwitchStmt($3, (List<Case*>*)$6->second, $7); }
-	                        ;
+	                        | T_Switch '(' expr ')' '{' switch_statement_list '}' { $$ = new SwitchStmt($3, (List<Case*>*)$6->second, NULL); }
+                            ;
 
 switch_statement_list       : { }
 	                        | statement_list { }
