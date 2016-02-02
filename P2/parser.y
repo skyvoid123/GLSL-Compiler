@@ -149,6 +149,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <expr>          logic_or_expr;
 %type <expr>          cond_expr;
 %type <expr>          assign_expr;
+%type <expr>        vec_expr;
 %type <op>          assign_op;
 %type <expr>          expr;
 %type <decl>          decl;
@@ -277,10 +278,20 @@ logic_or_expr               :    logic_xor_expr { $$=$1; }
 cond_expr                   :    logic_or_expr { $$=$1;}
 	                        ;
 
-assign_expr                 :    cond_expr { $$ = $1; }
+assign_expr                 :    vec_expr { $$ = $1; }
 	                        |    unary_expr assign_op assign_expr { $$ = new AssignExpr($1, $2, $3); }
 	                        ;
-
+vec_expr                    :    cond_expr{$$ = $1; }
+                            |    T_Vec2 '(' expr ')' {List <Expr*> *test = new List<Expr*>();
+                                                      test->Append($3);
+                                                      $$ = new Call(@1, NULL, new Identifier(@1, "vec2"),test); }
+                            |    T_Vec3 '(' expr ')' {List <Expr*> *test = new List<Expr*>();
+                                                      test->Append($3);
+                                                      $$ = new Call(@1, NULL, new Identifier(@1, "vec3"), test); }
+                            |    T_Vec4 '(' expr ')' {List <Expr*> *test = new List<Expr*>();
+                                                      test->Append($3);
+                                                      $$ = new Call(@1, NULL, new Identifier(@1, "vec4"), test); }
+                            ;
 assign_op                   :    '=' 		    { $$ = new Operator(@1, "="); }
 	                        |    T_MulE		    { $$ = new Operator(@1, "*="); }
 	                        |    T_DivE		    { $$ = new Operator(@1, "/="); }
