@@ -76,8 +76,59 @@ void CompoundExpr::PrintChildren(int indentLevel) {
    op->Print(indentLevel+1);
    if (right) right->Print(indentLevel+1);
 }
-   
+ 
+void ArithmeticExpr::Check() {
+  void* cmp = dynamic_cast<void*>(right);
+  cmp = dynamic_cast<void*>(left);
+  if(cmp == 0) {
+    ReportError:IncompatibleOperands(op, left right);
+  }
+}
+
+void RelationalExpr::Check() {
+  //TODO: still dunno if this is rite
+  void* cmp = dynamic_cast<void*>(right);
+  cmp = dynamic_cast<void*>(left);
+  if(cmp == 0) {
+    ReportError::IncompatibleOperands(op, left, right):   
+  }
+}
   
+void EqualityExpr::Check() {
+  //TODO: IDK!
+  void* cmp = dynamic_cast<void*>(right);
+  cmp = dynamic_cast<void*>(left);
+  if(cmp == 0) {
+    ReportError::IncompatibleOperands(op, left, right);
+  }
+}
+
+void LogicalExpr::Check() {
+  //TODO: StIlL DoNt KnOw 
+  void* cmp = dynamic_cast<void*>(right);
+  cmp = dynamic_cast<void*>(left);
+      if(cmp == 0) {
+          ReportError::IncompatibleOperands(op, left, right);
+            }
+
+}
+void AssignExpr::Check() {
+  //TODO: dunno if this is gonna worK
+  void* cmp = dynamic_cast<void*>(right);
+  cmp = dynamic_cast<void*>(left);
+  if(cmp == 0) {
+    ReportError::IncompatibleOperands(op, left, right);
+  }
+}
+
+void PostfixExpr::Check() {
+  //TODO: I DONT KNOW IF THIS WORKS EITHER!! OK?
+  string type = typeid(left).name();
+  if( type == "bool" || type == "void" ) {
+    ReportError::IncompatibleOperand(op, left);
+  }
+}
+
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this); 
     (subscript=s)->SetParent(this);
