@@ -41,6 +41,7 @@ void Program::Check() {
         decls->Nth(i)->Check(S);
     }
     S->exitScope();
+
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
@@ -54,10 +55,36 @@ void StmtBlock::PrintChildren(int indentLevel) {
     stmts->PrintAll(indentLevel+1);
 }
 
+void StmtBlock::Check(Symtab *S) {
+    for (int i = 0; i < decls->NumElements(); i++) {
+        VarDecl* v = decls->Nth(i);
+        S->insert(make_pair(v->getId(), v->getType()));
+    }
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Check(S);
+    }
+    for (int i = 0; i < stmts->NumElements(); i++) {
+        if (DeclStmt* d = dynamic_cast<DeclStmt*>(stmts->Nth(i))) {
+            d->Check(S);
+        }
+    }
+    S->printTable();
+}
 DeclStmt::DeclStmt(Decl *d) {
     Assert(d != NULL);
     (decl=d)->SetParent(this);
 }
+
+void DeclStmt::Check(Symtab *S) {
+    if (VarDecl *v = dynamic_cast<VarDecl*>(decl)) {
+        S->insert(make_pair(v->getId(), v->getType()));
+    }
+    else if (FnDecl *f = dynamic_cast<FnDecl*>(decl)) {
+        S->insert(make_pair(f->getId(), f->getReturnType()));
+    }
+    decl->Check(S);
+}
+
 
 void DeclStmt::PrintChildren(int indentLevel) {
     decl->Print(indentLevel+1);

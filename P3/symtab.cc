@@ -20,10 +20,11 @@ bool Symtab::insert(pair<string,string> var) {
         cout << "No Scope" << endl;
         return false;
     }
+    cout << "inserting " << var.first << endl;
     pair<map<string, string>::iterator, bool> ret;
     ret = table->at(levelNumber - 1)->insert(var);
     //TODO: declaration conflict
-    if (ret.second == false)
+    if (!ret.second)
         cout << "DECLARATION CONFLICT" << endl;
     return ret.second;
 }
@@ -46,11 +47,17 @@ void Symtab::exitScope() {
 void Symtab::printTable(int x) {
     if (x >= levelNumber) {
         cout << x << " Invalid Level" << endl;
+        return;
     }
     map<string, string> currMap = *table->at(x);
+    if (currMap.empty()) {
+        cout << "EMPTY LEVEL" << endl;
+        return;
+    }
     for (map<string,string>::iterator it = currMap.begin(); it!=currMap.end(); ++it)
         cout << it->first << " => " << it->second << endl;
 }
+
 void Symtab::printTable() {
     if (table->empty()) {
         cout << "EMPTY TABLE" << endl;
