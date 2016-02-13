@@ -24,6 +24,10 @@ class Expr : public Stmt
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
+
+    friend std::ostream& operator<< (std::ostream& stream, Expr * expr) {
+        return stream << expr->GetPrintNameForNode();
+    }
 };
 
 class ExprError : public Expr

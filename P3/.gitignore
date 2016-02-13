@@ -1,0 +1,5 @@
+glc
+*.o
+*.tab.*
+*.yy.c
+*.output
