@@ -23,6 +23,8 @@ bool Symtab::insert(pair<string,string> var) {
     pair<map<string, string>::iterator, bool> ret;
     ret = table->at(levelNumber - 1)->insert(var);
     //TODO: declaration conflict
+    if (ret.second == false)
+        cout << "DECLARATION CONFLICT" << endl;
     return ret.second;
 }
 
@@ -32,10 +34,30 @@ bool Symtab::find(string var) {
             return true;
     }
     //TODO: No declaration Error
+    cout << "NO DECLARATION ERROR" << endl;
     return false;
 }
 
 void Symtab::exitScope() {
     table->pop_back();
     levelNumber--;
+}
+
+void Symtab::printTable(int x) {
+    if (x >= levelNumber) {
+        cout << x << " Invalid Level" << endl;
+    }
+    map<string, string> currMap = *table->at(x);
+    for (map<string,string>::iterator it = currMap.begin(); it!=currMap.end(); ++it)
+        cout << it->first << " => " << it->second << endl;
+}
+void Symtab::printTable() {
+    if (table->empty()) {
+        cout << "EMPTY TABLE" << endl;
+        return;
+    }
+    for (int i = 0; i < levelNumber; i++) {
+        cout << "Printing Level " << i << endl;
+        printTable(i);
+    }
 }

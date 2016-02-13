@@ -26,14 +26,21 @@ void Program::Check() {
      *      checking itself, which makes for a great use of inheritance
      *      and polymorphism in the node classes.
      */
-
-    // sample test - not the actual working code
-    // replace it with your own implementation
-    if ( decls->NumElements() >= 2 ) {
-      // Decl *newDecl  = decls->Nth(1);
-      // Decl *prevDecl = decls->Nth(0);
-      // ReportError::DeclConflict(newDecl, prevDecl);
+    PrintChildren(0);
+    Symtab *S = new Symtab();
+    S->enterScope();
+    for (int i = 0; i < decls->NumElements(); i++) {
+        if (VarDecl *v = dynamic_cast<VarDecl*>(decls->Nth(i))) {
+            S->insert(make_pair(v->getId(), v->getType()));
+        }
+        else if (FnDecl *f = dynamic_cast<FnDecl*>(decls->Nth(i))) {
+            S->insert(make_pair(f->getId(), f->getReturnType()));
+        }
     }
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Check(S);
+    }
+    S->exitScope();
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {

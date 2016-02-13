@@ -3,3 +3,4 @@ glc
 *.tab.*
 *.yy.c
 *.output
+*.gch

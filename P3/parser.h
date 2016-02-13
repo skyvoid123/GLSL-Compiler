@@ -17,7 +17,6 @@
 #include "ast_decl.h"
 #include "ast_expr.h"
 #include "ast_stmt.h"
-#include "symtab.h"
 
  
 // Next, we want to get the exported defines for the token codes and

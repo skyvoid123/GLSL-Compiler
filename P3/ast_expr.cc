@@ -77,56 +77,56 @@ void CompoundExpr::PrintChildren(int indentLevel) {
    if (right) right->Print(indentLevel+1);
 }
  
-void ArithmeticExpr::Check() {
-  void* cmp = dynamic_cast<void*>(right);
-  cmp = dynamic_cast<void*>(left);
-  if(cmp == 0) {
-    ReportError:IncompatibleOperands(op, left right);
-  }
+void ArithmeticExpr::Check(Symtab *S) {
+  //void* cmp = dynamic_cast<void*>(right);
+  //cmp = dynamic_cast<void*>(left);
+  //if(cmp == 0) {
+  //    ReportError::IncompatibleOperands(op, left->getType(), right->getType());
+  //}
 }
 
-void RelationalExpr::Check() {
+void RelationalExpr::Check(Symtab *S) {
   //TODO: still dunno if this is rite
-  void* cmp = dynamic_cast<void*>(right);
-  cmp = dynamic_cast<void*>(left);
-  if(cmp == 0) {
-    ReportError::IncompatibleOperands(op, left, right):   
-  }
+  //void* cmp = dynamic_cast<void*>(right);
+  //cmp = dynamic_cast<void*>(left);
+  //if(cmp == 0) {
+  // ReportError::IncompatibleOperands(op, left, right);   
+  // }
 }
   
-void EqualityExpr::Check() {
+void EqualityExpr::Check(Symtab *S) {
   //TODO: IDK!
-  void* cmp = dynamic_cast<void*>(right);
-  cmp = dynamic_cast<void*>(left);
-  if(cmp == 0) {
-    ReportError::IncompatibleOperands(op, left, right);
-  }
+  //void* cmp = dynamic_cast<void*>(right);
+  //cmp = dynamic_cast<void*>(left);
+  //if(cmp == 0) {
+  //  ReportError::IncompatibleOperands(op, left, right);
+  // }
 }
 
-void LogicalExpr::Check() {
+void LogicalExpr::Check(Symtab *S) {
   //TODO: StIlL DoNt KnOw 
-  void* cmp = dynamic_cast<void*>(right);
-  cmp = dynamic_cast<void*>(left);
-      if(cmp == 0) {
-          ReportError::IncompatibleOperands(op, left, right);
-            }
+  //void* cmp = dynamic_cast<void*>(right);
+  //cmp = dynamic_cast<void*>(left);
+  //    if(cmp == 0) {
+  //        ReportError::IncompatibleOperands(op, left, right);
+  //          }
 
 }
-void AssignExpr::Check() {
+void AssignExpr::Check(Symtab *S) {
   //TODO: dunno if this is gonna worK
-  void* cmp = dynamic_cast<void*>(right);
-  cmp = dynamic_cast<void*>(left);
-  if(cmp == 0) {
-    ReportError::IncompatibleOperands(op, left, right);
-  }
+  //void* cmp = dynamic_cast<void*>(right);
+  //cmp = dynamic_cast<void*>(left);
+  //if(cmp == 0) {
+  //  ReportError::IncompatibleOperands(op, left, right);
+  //}
 }
 
-void PostfixExpr::Check() {
+void PostfixExpr::Check(Symtab *S) {
   //TODO: I DONT KNOW IF THIS WORKS EITHER!! OK?
-  string type = typeid(left).name();
-  if( type == "bool" || type == "void" ) {
-    ReportError::IncompatibleOperand(op, left);
-  }
+  //string type = typeid(left).name();
+  //if( type == "bool" || type == "void" ) {
+  // ReportError::IncompatibleOperand(op, left);
+  //}
 }
 
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {

@@ -15,7 +15,7 @@
 
 #include "ast.h"
 #include "list.h"
-
+#include "ast_type.h"
 class Type;
 class NamedType;
 class Identifier;
@@ -31,6 +31,7 @@ class Decl : public Node
   public:
     Decl() : id(NULL) {}
     Decl(Identifier *name);
+    const char* getId() { return id->getName(); }
     friend ostream& operator<<(ostream& out, Decl *d) { return out << d->id; }
 };
 
@@ -42,8 +43,10 @@ class VarDecl : public Decl
   public:
     VarDecl() : type(NULL) {}
     VarDecl(Identifier *name, Type *type);
+    const char *getType() { return type->getTypeName(); }
     const char *GetPrintNameForNode() { return "VarDecl"; }
     void PrintChildren(int indentLevel);
+    void Check(Symtab *S);
 };
 
 class VarDeclError : public VarDecl
@@ -63,6 +66,8 @@ class FnDecl : public Decl
   public:
     FnDecl() : Decl(), formals(NULL), returnType(NULL), body(NULL) {}
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
+    void Check(Symtab *S);
+    const char *getReturnType(){ return returnType->getTypeName(); }
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }
     void PrintChildren(int indentLevel);

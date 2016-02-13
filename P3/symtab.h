@@ -1,3 +1,5 @@
+#ifndef _H_symtab
+#define _H_symtab
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
@@ -15,4 +17,7 @@ class Symtab {
         bool insert(pair<string,string>);
         bool find(string);
         void exitScope();
+        void printTable(int);
+        void printTable();
 };
+#endif

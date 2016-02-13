@@ -39,6 +39,8 @@
 
 #include <stdlib.h>   // for NULL
 #include "location.h"
+#include "symtab.h"
+//#include "errors.h"
 #include <iostream>
 
 using namespace std;
@@ -63,6 +65,7 @@ class Node  {
     // subclasses should override PrintChildren() instead
     void Print(int indentLevel, const char *label = NULL); 
     virtual void PrintChildren(int indentLevel)  {}
+    virtual void Check(Symtab *S) { }
 };
    
 
@@ -73,6 +76,7 @@ class Identifier : public Node
     
   public:
     Identifier(yyltype loc, const char *name);
+    const char *getName() { return name; }
     const char *GetPrintNameForNode()   { return "Identifier"; }
     void PrintChildren(int indentLevel);
     friend ostream& operator<<(ostream& out, Identifier *id) { return out << id->name; }
