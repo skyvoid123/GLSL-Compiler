@@ -10,7 +10,6 @@
 #include "errors.h"
 
 Type* Expr::Check(Symtab* S) {
-  cout << "B" << endl;
   if(FieldAccess *f = dynamic_cast<FieldAccess*>(this)) {
     f->Check(S);
   }
@@ -336,18 +335,18 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 
 
 Type* FieldAccess::Check(Symtab* S) {
-  cout << "hi" << endl;
   Type* t1 = base->Check(S);
-  std::string t1Type(t1->getTypeName());
+  printf("%s\n", t1->getTypeName());
   // I made a char* and string, just cuz
   const char* swizC = field->getName();
   std::string swiz(field->getName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Field access accepts vec2, vec3, and vec4 
-  if( t1Type != "vec2" || t1Type != "vec3" || t1Type != "vec4" ) {
+  if( !t1->IsEquivalentTo(Type::vec2Type) && !t1->IsEquivalentTo(Type::vec3Type)
+	 && !t1->IsEquivalentTo(Type::vec4Type) ) {
     ReportError::InaccessibleSwizzle(field, base);
     return Type::errorType;
   }
@@ -360,12 +359,12 @@ Type* FieldAccess::Check(Symtab* S) {
     }
   }
   // Check if swizzle is within the proper scope of its vector
-  if( t1Type == "vec2" ) {
+  if( t1->IsEquivalentTo(Type::vec2Type) ) {
     if( strchr( swizC, 'z' ) != NULL || strchr( swizC, 'w' ) != NULL) {
       ReportError::SwizzleOutOfBound(field, base);
       return Type::errorType;
     }
-  } else if( t1Type == "vec3" ) {
+  } else if( t1->IsEquivalentTo(Type::vec3Type) ) {
     if( strchr( swizC, 'w' ) != NULL ) {
       ReportError::SwizzleOutOfBound(field, base);
       return Type::errorType;
