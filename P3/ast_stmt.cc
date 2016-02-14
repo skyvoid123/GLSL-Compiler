@@ -181,12 +181,14 @@ void IfStmt::PrintChildren(int indentLevel) {
 }
 
 Type* IfStmt::Check(Symtab *S) {
-    test->Check(S);
+    if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
+        ReportError::TestNotBoolean(test);
     S->enterScope();
     body->Check(S);
     S->exitScope();
     S->enterScope();
-    elseBody->Check(S);
+    if (elseBody != NULL)
+        elseBody->Check(S);
     S->exitScope();
     S->exitScope();
     return NULL;
