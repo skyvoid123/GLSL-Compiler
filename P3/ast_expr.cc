@@ -31,7 +31,7 @@ Type* BoolConstant::Check(Symtab* S) {
 }
 
 Type* VarExpr::Check(Symtab* S) {
-  Decl* findMe = new Decl(id);
+  Decl* findMe = new VarDecl(id, Type::intType);
   return S->findType(findMe);
 }
 
@@ -115,13 +115,11 @@ Type* ArithmeticExpr::Check(Symtab *S) {
   //    ReportError::IncompatibleOperands(op, left->getType(), right->getType());
   //}
   // Get left and right types
-  Type* t1 = NULL;
-  Type* t2 = NULL;
+  Type* t1 = left->Check(S);
+  Type* t2 = right->Check(S);
   char* oper = op->getOp();
-  const char t11 = NULL;
-  const char t22 = NULL;
-  std::string t1Type(t11);
-  std::string t2Type(t22);
+  std::string t1Type(t1->getTypeName());
+  std::string t2Type(t2->getTypeName());
   // Check compatibility
   if( t1Type != t2Type ) {
     // float compatible with vec and mat
@@ -217,8 +215,8 @@ Type* RelationalExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   // ReportError::IncompatibleOperands(op, left, right);   
   // }
-  Type* t1 = NULL;
-  Type* t2 = NULL;
+  Type* t1 = left->Check(S);
+  Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
   if( t1Type == "int" && t2Type == "int" ) {
@@ -239,8 +237,8 @@ Type* EqualityExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   //  ReportError::IncompatibleOperands(op, left, right);
   // }
-  Type* t1 = NULL;
-  Type* t2 = NULL;
+  Type* t1 = left->Check(S);
+  Type* t2 = right->Check(S);
   if( t1->getTypeName() == t2->getTypeName() ) {
     return Type::boolType;
   } else {
@@ -256,8 +254,8 @@ Type* LogicalExpr::Check(Symtab *S) {
   //    if(cmp == 0) {
   //        ReportError::IncompatibleOperands(op, left, right);
   //          }
-  Type* t1 = NULL;
-  Type* t2 = NULL;
+  Type* t1 = left->Check(S);
+  Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
   if( t1Type == "bool" && t2Type == "bool") {
@@ -274,8 +272,8 @@ Type* AssignExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   //  ReportError::IncompatibleOperands(op, left, right);
   //}
-  Type* t1 = NULL;
-  Type* t2 = NULL;
+  Type* t1 = left->Check(S);
+  Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
   if( t1Type == t2Type) {
@@ -292,7 +290,7 @@ Type* PostfixExpr::Check(Symtab *S) {
   //if( type == "bool" || type == "void" ) {
   // ReportError::IncompatibleOperand(op, left);
   //}
-  Type* t1 = NULL;
+  Type* t1 = left->Check(S);
   std::string t1Type(t1->getTypeName());
   if( t1Type == "int" ) {
     return Type::intType;

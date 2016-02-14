@@ -24,7 +24,7 @@ class Expr : public Stmt
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
-    virtual Type* Check(Symtab* S) {}
+    //virtual Type* Check(Symtab* S);
 
     friend std::ostream& operator<< (std::ostream& stream, Expr * expr) {
         return stream << expr->GetPrintNameForNode();
