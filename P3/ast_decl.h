@@ -31,6 +31,7 @@ class Decl : public Node
   public:
     Decl() : id(NULL) {}
     Decl(Identifier *name);
+    Type* Check(Symtab *S);
     const char* getId() { return id->getName(); }
     friend ostream& operator<<(ostream& out, Decl *d) { return out << d->id; }
 };
@@ -46,7 +47,7 @@ class VarDecl : public Decl
     Type *getType() { return type; }
     const char *GetPrintNameForNode() { return "VarDecl"; }
     void PrintChildren(int indentLevel);
-    void Check(Symtab *S);
+    Type* Check(Symtab *S);
 };
 
 class VarDeclError : public VarDecl
@@ -66,7 +67,7 @@ class FnDecl : public Decl
   public:
     FnDecl() : Decl(), formals(NULL), returnType(NULL), body(NULL) {}
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
-    void Check(Symtab *S);
+    Type* Check(Symtab *S);
     Type *getReturnType(){ return returnType; }
     void SetFunctionBody(Stmt *b);
     const char *GetPrintNameForNode() { return "FnDecl"; }

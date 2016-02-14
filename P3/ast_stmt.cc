@@ -18,7 +18,7 @@ void Program::PrintChildren(int indentLevel) {
     printf("\n");
 }
 
-void Program::Check() {
+Type* Program::Check() {
     /* pp3: here is where the semantic analyzer is kicked off.
      *      The general idea is perform a tree traversal of the
      *      entire program, examining all constructs for compliance
@@ -41,7 +41,7 @@ void Program::Check() {
         decls->Nth(i)->Check(S);
     }
     S->exitScope();
-
+    return NULL;
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
@@ -55,7 +55,7 @@ void StmtBlock::PrintChildren(int indentLevel) {
     stmts->PrintAll(indentLevel+1);
 }
 
-void StmtBlock::Check(Symtab *S) {
+Type* StmtBlock::Check(Symtab *S) {
     for (int i = 0; i < decls->NumElements(); i++) {
         VarDecl* v = decls->Nth(i);
         S->insert(make_pair(v, v->getType()));
@@ -69,13 +69,14 @@ void StmtBlock::Check(Symtab *S) {
         }
     }
     S->printTable();
+    return NULL;
 }
 DeclStmt::DeclStmt(Decl *d) {
     Assert(d != NULL);
     (decl=d)->SetParent(this);
 }
 
-void DeclStmt::Check(Symtab *S) {
+Type* DeclStmt::Check(Symtab *S) {
     if (VarDecl *v = dynamic_cast<VarDecl*>(decl)) {
         S->insert(make_pair(v, v->getType()));
     }
@@ -83,6 +84,7 @@ void DeclStmt::Check(Symtab *S) {
         S->insert(make_pair(f, f->getReturnType()));
     }
     decl->Check(S);
+    return NULL;
 }
 
 

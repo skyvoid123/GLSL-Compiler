@@ -23,11 +23,14 @@ void VarDecl::PrintChildren(int indentLevel) {
    if (id) id->Print(indentLevel+1);
 }
 
-void VarDecl::Check(Symtab *S) {
-    
+Type* Decl::Check(Symtab *S) {
+  return NULL;
+}
+Type* VarDecl::Check(Symtab *S) {
+  return NULL;
 }
 
-void FnDecl::Check(Symtab *S) {
+Type* FnDecl::Check(Symtab *S) {
     S->enterScope();
     for (int i = 0 ; i < formals->NumElements(); i++) {
         VarDecl *v = formals->Nth(i);
@@ -40,6 +43,7 @@ void FnDecl::Check(Symtab *S) {
         s->Check(S);
     }
     S->exitScope();
+    return NULL;
 }
 FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
     Assert(n != NULL && r!= NULL && d != NULL);
