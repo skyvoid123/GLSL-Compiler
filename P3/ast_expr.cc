@@ -71,21 +71,87 @@ CompoundExpr::CompoundExpr(Expr *l, Operator *o)
     (op=o)->SetParent(this);
 }
 
-void CompoundExpr::PrintChildren(int indentLevel) {
+Type CompoundExpr::PrintChildren(int indentLevel) {
    if (left) left->Print(indentLevel+1);
    op->Print(indentLevel+1);
    if (right) right->Print(indentLevel+1);
 }
  
-void ArithmeticExpr::Check(Symtab *S) {
+Type ArithmeticExpr::Check(Symtab *S) {
   //void* cmp = dynamic_cast<void*>(right);
   //cmp = dynamic_cast<void*>(left);
   //if(cmp == 0) {
   //    ReportError::IncompatibleOperands(op, left->getType(), right->getType());
   //}
+  // Get left and right types
+  Type t1 = left->getType();
+  Type t2 = right->getType();
+  const char t1Type;
+  const char t2Type;
+  // Check compatibility
+  if( t1Type != t2Type ) {
+    // float compatible with vec and mat
+    if( t1Type == "float") {
+      if( t2Type == "vec2" ) {
+        return Type::vec2Type;
+      } else if( t2Type == "vec3" ) {
+        return Type::vec3Type;
+      } else if( t2Type == "vec4" ) {
+        return Type::vec4Type;
+      } else if( t2Type == "mat2" ) {
+        return Type::mat2Type;
+      } else if( t2Type == "mat3" ) { 
+        return Type::mat3Type;
+      } else if( t2Type == "mat4" ) {
+        return Type::mat4Type;
+      } else {
+        return Type::errorType;
+      }
+
+    } else if( t2Type == "float") {
+      if( t1Type == "vec2" ) {
+        return Type::vec2Type;
+      } else if( t1Type == "vec3" ) {
+        return Type::vec3Type;
+      } else if( t1Type == "vec4" ) {
+        return Type::vec4Type;
+      } else if( t1Type == "mat2" ) {
+        return Type::mat2Type;
+      } else if( t1Type == "mat3" ) {
+        return Type::mat3Type;
+      } else if( t1Type == "mat4" ) {
+        return Type::mat4Type;
+      } else {
+        return Type::errorType;
+      }
+
+    } else if( (t1Type == "vec2" && t2Type == "mat2") ||
+                (t1Type == "mat2" && t2Type == "vec2") ) {
+      return Type::vec2Type;
+    } else if( (t1Type == "vec3" && t2Type == "mat3") ||
+                (t1Type == "mat3" && t2Type == "vec3") ) {
+      return Type::vec3Type;
+    } 
+    } else if( (t1Type == "vec4" && t2Type == "mat4") || 
+		(t1Type == "mat4" && t2Type == "vec4") ) {
+      return Type::vec4Type;
+    } else {
+      ReportError::IncompatibleOperands(op, t1, t2);
+      return Type::errorType;
+    }
+  } else if( t1Type == "bool" ) {
+    ReportError::IncompatibleOperands(op, t1, t2);
+    return Type::errorType;
+
+  } else if( t1Type == "void" ) {
+    ReportError::IncompatibleOperands(op, t1, t2);
+    return Type::errorType;
+
+  }
+  return t1;
 }
 
-void RelationalExpr::Check(Symtab *S) {
+Type RelationalExpr::Check(Symtab *S) {
   //TODO: still dunno if this is rite
   //void* cmp = dynamic_cast<void*>(right);
   //cmp = dynamic_cast<void*>(left);
@@ -94,7 +160,7 @@ void RelationalExpr::Check(Symtab *S) {
   // }
 }
   
-void EqualityExpr::Check(Symtab *S) {
+Type EqualityExpr::Check(Symtab *S) {
   //TODO: IDK!
   //void* cmp = dynamic_cast<void*>(right);
   //cmp = dynamic_cast<void*>(left);
@@ -103,7 +169,7 @@ void EqualityExpr::Check(Symtab *S) {
   // }
 }
 
-void LogicalExpr::Check(Symtab *S) {
+Type LogicalExpr::Check(Symtab *S) {
   //TODO: StIlL DoNt KnOw 
   //void* cmp = dynamic_cast<void*>(right);
   //cmp = dynamic_cast<void*>(left);
@@ -112,7 +178,7 @@ void LogicalExpr::Check(Symtab *S) {
   //          }
 
 }
-void AssignExpr::Check(Symtab *S) {
+Type AssignExpr::Check(Symtab *S) {
   //TODO: dunno if this is gonna worK
   //void* cmp = dynamic_cast<void*>(right);
   //cmp = dynamic_cast<void*>(left);
@@ -121,7 +187,7 @@ void AssignExpr::Check(Symtab *S) {
   //}
 }
 
-void PostfixExpr::Check(Symtab *S) {
+Type PostfixExpr::Check(Symtab *S) {
   //TODO: I DONT KNOW IF THIS WORKS EITHER!! OK?
   //string type = typeid(left).name();
   //if( type == "bool" || type == "void" ) {
