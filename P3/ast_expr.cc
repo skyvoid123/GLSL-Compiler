@@ -114,99 +114,107 @@ void CompoundExpr::PrintChildren(int indentLevel) {
 }
  
 Type* ArithmeticExpr::Check(Symtab *S) {
-  Type* t1 = left->Check(S);
+  Type* t1;
+  if( left == NULL ) {
+    t1 = NULL;
+  } else {
+    t1 = left->Check(S);
+  }
   Type* t2 = right->Check(S);
   char* oper = op->getOp();
-  std::string t1Type(t1->getTypeName());
-  std::string t2Type(t2->getTypeName());
-  // Check for error type, avoid kaskades
-  if( t1Type == "error" || t2Type == "error" ) {
-    return Type::errorType;
-  }
-  // Check compatibility
-  if( t1Type != t2Type ) {
-    // float compatible with vec and mat, return the vec/mat
-    if( t1Type == "float") {
-      if( t2Type == "vec2" ) {
-        return Type::vec2Type;
-      } else if( t2Type == "vec3" ) {
-        return Type::vec3Type;
-      } else if( t2Type == "vec4" ) {
-        return Type::vec4Type;
-      } else if( t2Type == "mat2" ) {
-        return Type::mat2Type;
-      } else if( t2Type == "mat3" ) { 
-        return Type::mat3Type;
-      } else if( t2Type == "mat4" ) {
-        return Type::mat4Type;
-      } else {
-        return Type::errorType;
-      }
-
-    } else if( t2Type == "float") {
-      if( t1Type == "vec2" ) {
-        return Type::vec2Type;
-      } else if( t1Type == "vec3" ) {
-        return Type::vec3Type;
-      } else if( t1Type == "vec4" ) {
-        return Type::vec4Type;
-      } else if( t1Type == "mat2" ) {
-        return Type::mat2Type;
-      } else if( t1Type == "mat3" ) {
-        return Type::mat3Type;
-      } else if( t1Type == "mat4" ) {
-        return Type::mat4Type;
-      } else {
-        return Type::errorType;
-      }
-    // If op is *, then can vec can match with mat of equal size, returns vec
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec2" && 
-		t2Type == "mat2") || (t1Type == "mat2" && t2Type == "vec2")) ) {
-      return Type::vec2Type;
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec3" && 
-		t2Type == "mat3") || (t1Type == "mat3" && t2Type == "vec3")) ) {
-      return Type::vec3Type; 
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec4" && 
-		t2Type == "mat4") || (t1Type == "mat4" && t2Type == "vec4")) ) {
-      return Type::vec4Type;
-    } else {
-      ReportError::IncompatibleOperands(op, t1, t2);
-      return Type::errorType;
-    }
-  } else if( t1Type == "bool" ) {
-    //types cant be bool
-    ReportError::IncompatibleOperands(op, t1, t2);
-    return Type::errorType;
-  } else if( t1Type == "void" ) {
-    //types can't be void
-    ReportError::IncompatibleOperands(op, t1, t2);
-    return Type::errorType;
-
-  } else if( t1Type.empty() && !t2Type.empty()) {
-    // unary expression, can be float, int, vec, or mat
-    if(strcmp(oper, "++") == 0 || strcmp(oper,"--") == 0 
-		|| strcmp(oper,"-") == 0 || strcmp(oper, "+") == 0) {
-      if( t2Type == "int" ) {
-        return Type::intType;  
-      } else if( t2Type == "float" ) {
+  // Check unary expr first to avoid segfaults from t1 being NULL
+  if( t1 == NULL && t2 != NULL) {
+    if(strcmp(oper, "++") == 0 || strcmp(oper,"--") == 0
+                || strcmp(oper,"-") == 0 || strcmp(oper, "+") == 0) {
+      if( t2->IsEquivalentTo(Type::intType) ) {
+        return Type::intType;
+      } else if( t2->IsEquivalentTo(Type::floatType) ) {
         return Type::floatType;
-      } else if( t2Type == "vec2" ) {
+      } else if( t2->IsEquivalentTo(Type::vec2Type) ) {
          return Type::vec2Type;
-      } else if( t2Type == "vec3" ) {
+      } else if( t2->IsEquivalentTo(Type::vec3Type) ) {
          return Type::vec3Type;
-      } else if( t2Type == "vec4" ) {
+      } else if( t2->IsEquivalentTo(Type::vec4Type) ) {
          return Type::vec4Type;
-      } else if( t2Type == "mat2" ) {
+      } else if( t2->IsEquivalentTo(Type::mat2Type) ) {
          return Type::mat2Type;
-      } else if( t2Type == "mat3" ) {
+      } else if( t2->IsEquivalentTo(Type::mat3Type) ) {
          return Type::mat3Type;
-      } else if( t2Type == "mat4" ) {
+      } else if( t2->IsEquivalentTo(Type::mat4Type) ) {
          return Type::mat4Type;
       } else {
          ReportError::IncompatibleOperand(op, t2);
          return Type::errorType;
       }
+    } else {
+      ReportError::IncompatibleOperand(op, t2);
+      return Type::errorType;
     }
+  }
+  // Check for error type, avoid kaskades
+  if( t1->IsEquivalentTo(Type::errorType) || 
+		t2->IsEquivalentTo(Type::errorType) ) {
+    return Type::errorType;
+  }
+  // Check compatibility
+  if( t1->IsEquivalentTo(t2) ) {
+    // float compatible with vec and mat, return the vec/mat
+    if( t1->IsEquivalentTo(Type::floatType)) {
+      if( t2->IsEquivalentTo(Type::vec2Type) ) {
+        return Type::vec2Type;
+      } else if( t2->IsEquivalentTo(Type::vec3Type) ) {
+        return Type::vec3Type;
+      } else if( t2->IsEquivalentTo(Type::vec4Type) ) {
+        return Type::vec4Type;
+      } else if( t2->IsEquivalentTo(Type::mat2Type) ) {
+        return Type::mat2Type;
+      } else if( t2->IsEquivalentTo(Type::mat3Type) ) { 
+        return Type::mat3Type;
+      } else if( t2->IsEquivalentTo(Type::mat4Type) ) {
+        return Type::mat4Type;
+      } else {
+        return Type::errorType;
+      }
+
+    } else if( t2->IsEquivalentTo(Type::floatType)) {
+      if( t1->IsEquivalentTo(Type::vec2Type) ) {
+        return Type::vec2Type;
+      } else if( t1->IsEquivalentTo(Type::vec3Type) ) {
+        return Type::vec3Type;
+      } else if( t1->IsEquivalentTo(Type::vec4Type) ) {
+        return Type::vec4Type;
+      } else if( t1->IsEquivalentTo(Type::mat2Type) ) {
+        return Type::mat2Type;
+      } else if( t1->IsEquivalentTo(Type::mat3Type) ) {
+        return Type::mat3Type;
+      } else if( t1->IsEquivalentTo(Type::mat4Type) ) {
+        return Type::mat4Type;
+      } else {
+        return Type::errorType;
+      }
+    // If op is *, then can vec can match with mat of equal size, returns vec
+    } else if( strcmp(oper, "*")  == 0 && ((t1->IsEquivalentTo(Type::vec2Type) &&
+	t2->IsEquivalentTo(Type::mat2Type)) || (t1->IsEquivalentTo(Type::mat2Type) && t2->IsEquivalentTo(Type::vec2Type))) ) {
+      return Type::vec2Type;
+    } else if( strcmp(oper, "*")  == 0 && ((t1->IsEquivalentTo(Type::vec3Type) &
+	t2->IsEquivalentTo(Type::mat3Type)) || (t1->IsEquivalentTo(Type::mat3Type) && t2->IsEquivalentTo(Type::vec3Type))) ) {
+      return Type::vec3Type; 
+    } else if( strcmp(oper, "*")  == 0 && ((t1->IsEquivalentTo(Type::vec4Type) & 
+	t2->IsEquivalentTo(Type::mat4Type)) || (t1->IsEquivalentTo(Type::mat4Type) && t2->IsEquivalentTo(Type::vec4Type))) ) {
+      return Type::vec4Type;
+    } else {
+      ReportError::IncompatibleOperands(op, t1, t2);
+      return Type::errorType;
+    }
+  } else if( t1->IsEquivalentTo(Type::boolType) ) {
+    //types cant be bool
+    ReportError::IncompatibleOperands(op, t1, t2);
+    return Type::errorType;
+  } else if( t1->IsEquivalentTo(Type::voidType) ) {
+    //types can't be void
+    ReportError::IncompatibleOperands(op, t1, t2);
+    return Type::errorType;
+
   }
   return t1;
 }
@@ -214,16 +222,16 @@ Type* ArithmeticExpr::Check(Symtab *S) {
 Type* RelationalExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
-  std::string t1Type(t1->getTypeName());
-  std::string t2Type(t2->getTypeName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" || t2Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) || 
+		t2->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Relational can be int int or float float, returns a bool Type
-  if( t1Type == "int" && t2Type == "int" ) {
+  if( t1->IsEquivalentTo(Type::intType) && t2->IsEquivalentTo(Type::intType) ) {
 
-  } else if( t1Type == "float" && t2Type == "float" ) {
+  } else if( t1->IsEquivalentTo(Type::floatType) && 
+		t2->IsEquivalentTo(Type::floatType) ) {
  
   } else {
     ReportError::IncompatibleOperands(op, t1, t2);
@@ -235,14 +243,13 @@ Type* RelationalExpr::Check(Symtab *S) {
 Type* EqualityExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
-  std::string t1Type(t1->getTypeName());
-  std::string t2Type(t2->getTypeName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" || t2Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) || 
+		t2->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Equality expr takes two of the same type, returns a bool
-  if( t1->getTypeName() == t2->getTypeName() ) {
+  if( t1->IsEquivalentTo(t2) ) {
     return Type::boolType;
   } else {
     ReportError::IncompatibleOperands(op, t1, t2);
@@ -253,14 +260,13 @@ Type* EqualityExpr::Check(Symtab *S) {
 Type* LogicalExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
-  std::string t1Type(t1->getTypeName());
-  std::string t2Type(t2->getTypeName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" || t2Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) || 
+		t2->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Logical expr takes two bools and returns a bool
-  if( t1Type == "bool" && t2Type == "bool") {
+  if( t1->IsEquivalentTo(Type::boolType) && t2->IsEquivalentTo(Type::boolType)) {
     return Type::boolType;
   } else {
     ReportError::IncompatibleOperands(op, t1, t2);
@@ -270,14 +276,13 @@ Type* LogicalExpr::Check(Symtab *S) {
 Type* AssignExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
-  std::string t1Type(t1->getTypeName());
-  std::string t2Type(t2->getTypeName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" || t2Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) || 
+		t2->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Assign expr takes two equal types and returns that type
-  if( t1Type == t2Type) {
+  if( t1->IsEquivalentTo(t2)) {
     return t1;
   } else {
     ReportError::IncompatibleOperands(op, t1, t2);
@@ -287,27 +292,26 @@ Type* AssignExpr::Check(Symtab *S) {
 
 Type* PostfixExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
-  std::string t1Type(t1->getTypeName());
   // Check for error type, avoid kaskades
-  if( t1Type == "error" ) {
+  if( t1->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
   }
   // Postfix expr can be int, float, vec, or mat, returns same type
-  if( t1Type == "int" ) {
+  if( t1->IsEquivalentTo(Type::intType) ) {
     return Type::intType;
-  } else if( t1Type == "float" ) {
+  } else if( t1->IsEquivalentTo(Type::floatType) ) {
     return Type::floatType;
-  } else if( t1Type == "vec2" ) { 
+  } else if( t1->IsEquivalentTo(Type::vec2Type) ) { 
     return Type::vec2Type;
-  } else if ( t1Type == "vec3" ) {
+  } else if ( t1->IsEquivalentTo(Type::vec3Type) ) {
      return Type::vec3Type;
-  } else if ( t1Type == "vec4" ) {
+  } else if ( t1->IsEquivalentTo(Type::vec4Type) ) {
      return Type::vec4Type;
-  } else if ( t1Type == "mat2" ) {
+  } else if ( t1->IsEquivalentTo(Type::mat2Type) ) {
      return Type::mat2Type;
-  } else if ( t1Type == "mat3" ) {
+  } else if ( t1->IsEquivalentTo(Type::mat3Type) ) {
      return Type::mat3Type;
-  } else if ( t1Type == "mat4" ) {
+  } else if ( t1->IsEquivalentTo(Type::mat4Type) ) {
      return Type::mat4Type;
   } else {
     ReportError::IncompatibleOperand(op, t1);
@@ -336,7 +340,6 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 
 Type* FieldAccess::Check(Symtab* S) {
   Type* t1 = base->Check(S);
-  printf("%s\n", t1->getTypeName());
   // I made a char* and string, just cuz
   const char* swizC = field->getName();
   std::string swiz(field->getName());
