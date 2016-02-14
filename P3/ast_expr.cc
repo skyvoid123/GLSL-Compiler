@@ -9,7 +9,6 @@
 #include "ast_decl.h"
 #include "errors.h"
 
-
 Type* ExprError::Check(Symtab* S) {
   return Type::errorType;
 }
@@ -109,20 +108,18 @@ void CompoundExpr::PrintChildren(int indentLevel) {
 }
  
 Type* ArithmeticExpr::Check(Symtab *S) {
-  //void* cmp = dynamic_cast<void*>(right);
-  //cmp = dynamic_cast<void*>(left);
-  //if(cmp == 0) {
-  //    ReportError::IncompatibleOperands(op, left->getType(), right->getType());
-  //}
-  // Get left and right types
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
   char* oper = op->getOp();
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" || t2Type == "error" ) {
+    return Type::errorType;
+  }
   // Check compatibility
   if( t1Type != t2Type ) {
-    // float compatible with vec and mat
+    // float compatible with vec and mat, return the vec/mat
     if( t1Type == "float") {
       if( t2Type == "vec2" ) {
         return Type::vec2Type;
@@ -156,15 +153,15 @@ Type* ArithmeticExpr::Check(Symtab *S) {
       } else {
         return Type::errorType;
       }
-
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec2" && t2Type == "mat2")
-		 || (t1Type == "mat2" && t2Type == "vec2")) ) {
+    // If op is *, then can vec can match with mat of equal size, returns vec
+    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec2" && 
+		t2Type == "mat2") || (t1Type == "mat2" && t2Type == "vec2")) ) {
       return Type::vec2Type;
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec3" && t2Type == "mat3")
-		 || (t1Type == "mat3" && t2Type == "vec3")) ) {
+    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec3" && 
+		t2Type == "mat3") || (t1Type == "mat3" && t2Type == "vec3")) ) {
       return Type::vec3Type; 
-    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec4" && t2Type == "mat4")
- 		|| (t1Type == "mat4" && t2Type == "vec4")) ) {
+    } else if( strcmp(oper, "*")  == 0 && ((t1Type == "vec4" && 
+		t2Type == "mat4") || (t1Type == "mat4" && t2Type == "vec4")) ) {
       return Type::vec4Type;
     } else {
       ReportError::IncompatibleOperands(op, t1, t2);
@@ -180,7 +177,7 @@ Type* ArithmeticExpr::Check(Symtab *S) {
     return Type::errorType;
 
   } else if( t1Type.empty() && !t2Type.empty()) {
-    // unary expression
+    // unary expression, can be float, int, vec, or mat
     if(strcmp(oper, "++") == 0 || strcmp(oper,"--") == 0 
 		|| strcmp(oper,"-") == 0 || strcmp(oper, "+") == 0) {
       if( t2Type == "int" ) {
@@ -209,16 +206,15 @@ Type* ArithmeticExpr::Check(Symtab *S) {
 }
 
 Type* RelationalExpr::Check(Symtab *S) {
-  //TODO: still dunno if this is rite
-  //void* cmp = dynamic_cast<void*>(right);
-  //cmp = dynamic_cast<void*>(left);
-  //if(cmp == 0) {
-  // ReportError::IncompatibleOperands(op, left, right);   
-  // }
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" || t2Type == "error" ) {
+    return Type::errorType;
+  }
+  // Relational can be int int or float float, returns a bool Type
   if( t1Type == "int" && t2Type == "int" ) {
 
   } else if( t1Type == "float" && t2Type == "float" ) {
@@ -231,14 +227,15 @@ Type* RelationalExpr::Check(Symtab *S) {
 }
   
 Type* EqualityExpr::Check(Symtab *S) {
-  //TODO: IDK!
-  //void* cmp = dynamic_cast<void*>(right);
-  //cmp = dynamic_cast<void*>(left);
-  //if(cmp == 0) {
-  //  ReportError::IncompatibleOperands(op, left, right);
-  // }
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
+  std::string t1Type(t1->getTypeName());
+  std::string t2Type(t2->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" || t2Type == "error" ) {
+    return Type::errorType;
+  }
+  // Equality expr takes two of the same type, returns a bool
   if( t1->getTypeName() == t2->getTypeName() ) {
     return Type::boolType;
   } else {
@@ -248,16 +245,15 @@ Type* EqualityExpr::Check(Symtab *S) {
 }
 
 Type* LogicalExpr::Check(Symtab *S) {
-  //TODO: StIlL DoNt KnOw 
-  //void* cmp = dynamic_cast<void*>(right);
-  //cmp = dynamic_cast<void*>(left);
-  //    if(cmp == 0) {
-  //        ReportError::IncompatibleOperands(op, left, right);
-  //          }
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" || t2Type == "error" ) {
+    return Type::errorType;
+  }
+  // Logical expr takes two bools and returns a bool
   if( t1Type == "bool" && t2Type == "bool") {
     return Type::boolType;
   } else {
@@ -266,16 +262,15 @@ Type* LogicalExpr::Check(Symtab *S) {
   }
 }
 Type* AssignExpr::Check(Symtab *S) {
-  //TODO: dunno if this is gonna worK
-  //void* cmp = dynamic_cast<void*>(right);
-  //cmp = dynamic_cast<void*>(left);
-  //if(cmp == 0) {
-  //  ReportError::IncompatibleOperands(op, left, right);
-  //}
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
   std::string t1Type(t1->getTypeName());
   std::string t2Type(t2->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" || t2Type == "error" ) {
+    return Type::errorType;
+  }
+  // Assign expr takes two equal types and returns that type
   if( t1Type == t2Type) {
     return t1;
   } else {
@@ -285,13 +280,13 @@ Type* AssignExpr::Check(Symtab *S) {
 }
 
 Type* PostfixExpr::Check(Symtab *S) {
-  //TODO: I DONT KNOW IF THIS WORKS EITHER!! OK?
-  //string type = typeid(left).name();
-  //if( type == "bool" || type == "void" ) {
-  // ReportError::IncompatibleOperand(op, left);
-  //}
   Type* t1 = left->Check(S);
   std::string t1Type(t1->getTypeName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" ) {
+    return Type::errorType;
+  }
+  // Postfix expr can be int, float, vec, or mat, returns same type
   if( t1Type == "int" ) {
     return Type::intType;
   } else if( t1Type == "float" ) {
@@ -333,10 +328,64 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 }
 
 
-  void FieldAccess::PrintChildren(int indentLevel) {
+Type* FieldAccess::Check(Symtab* S) {
+  Type* t1 = base->Check(S);
+  std::string t1Type(t1->getTypeName());
+  // I made a char* and string, just cuz
+  const char* swizC = field->getName();
+  std::string swiz(field->getName());
+  // Check for error type, avoid kaskades
+  if( t1Type == "error" ) {
+    return Type::errorType;
+  }
+  // Field access accepts vec2, vec3, and vec4 
+  if( t1Type != "vec2" || t1Type != "vec3" || t1Type != "vec4" ) {
+    ReportError::InaccessibleSwizzle(field, base);
+    return Type::errorType;
+  }
+  // Check if swizzle contains anything besides xyzw
+  int i; 
+  for( i = 0; i < swiz.size(); i++ ) {
+    if( swiz[i] != 'x' && swiz[i] != 'y' && swiz[i] != 'z' && swiz[i] != 'w' ) {
+      ReportError::InvalidSwizzle(field, base);
+      return Type::errorType;
+    }
+  }
+  // Check if swizzle is within the proper scope of its vector
+  if( t1Type == "vec2" ) {
+    if( strchr( swizC, 'z' ) != NULL || strchr( swizC, 'w' ) != NULL) {
+      ReportError::SwizzleOutOfBound(field, base);
+      return Type::errorType;
+    }
+  } else if( t1Type == "vec3" ) {
+    if( strchr( swizC, 'w' ) != NULL ) {
+      ReportError::SwizzleOutOfBound(field, base);
+      return Type::errorType;
+    }
+  }
+  // Check if swizzle is too long, over 4 values
+  if( swiz.length() > 4 ) {
+    ReportError::OversizedVector(field, base);
+    return Type::errorType;
+  }
+  // Otherwise, swizzle is properly formed, return vector of swizzle length
+  if( swiz.length() == 1 ) {
+    return Type::floatType;
+  } else if( swiz.length() == 2 ) {
+    return Type::vec2Type;
+  } else if( swiz.length() == 3 ) {
+    return Type::vec3Type;
+  } else if( swiz.length() == 4 ) {
+    return Type::vec4Type;
+  } else {
+    printf("shouldnt be here\n From, field access\n");
+    return NULL;
+  }
+}
+void FieldAccess::PrintChildren(int indentLevel) {
     if (base) base->Print(indentLevel+1);
     field->Print(indentLevel+1);
-  }
+}
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     Assert(f != NULL && a != NULL); // b can be be NULL (just means no explicit base)
