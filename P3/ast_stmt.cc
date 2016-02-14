@@ -73,16 +73,13 @@ void StmtBlock::PrintChildren(int indentLevel) {
 
 Type* StmtBlock::Check(Symtab *S) {
     for (int i = 0; i < decls->NumElements(); i++) {
-        VarDecl* v = decls->Nth(i);
-        S->insert(make_pair(v, v->getType()));
+        decls->Nth(i)->Check(S);
     }
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Check(S);
     }
     for (int i = 0; i < stmts->NumElements(); i++) {
-        if (DeclStmt* d = dynamic_cast<DeclStmt*>(stmts->Nth(i))) {
-            d->Check(S);
-        }
+        stmts->Nth(i)->Check(S);
     }
     S->printTable();
     return NULL;
