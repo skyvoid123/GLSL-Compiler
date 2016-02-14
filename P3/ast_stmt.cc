@@ -26,7 +26,7 @@ Type* Program::Check() {
      *      checking itself, which makes for a great use of inheritance
      *      and polymorphism in the node classes.
      */
-    //PrintChildren(0);
+    PrintChildren(0);
     Symtab *S = new Symtab();
     S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
