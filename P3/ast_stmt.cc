@@ -30,12 +30,7 @@ Type* Program::Check() {
     Symtab *S = new Symtab();
     S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
-        if (VarDecl *v = dynamic_cast<VarDecl*>(decls->Nth(i))) {
-            S->insert(make_pair(v, v->getType()));
-        }
-        else if (FnDecl *f = dynamic_cast<FnDecl*>(decls->Nth(i))) {
-            S->insert(make_pair(f, f->getReturnType()));
-        }
+        decls->Nth(i)->Add(S);
     }
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Check(S);
@@ -44,6 +39,17 @@ Type* Program::Check() {
     return NULL;
 }
 
+Type* Stmt::Check(Symtab *S) {
+    if (StmtBlock* s = dynamic_cast<StmtBlock*>(this))
+        s->Check(S);
+    else if (DeclStmt* d = dynamic_cast<DeclStmt*>(this))
+        d->Check(S);
+    else if (SwitchLabel *sw = dynamic_cast<SwitchLabel*>(this))
+        sw->Check(S);
+    else if (BreakStmt *b = dynamic_cast<BreakStmt*>(this))
+        b->Check(S);
+    return NULL;
+}
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     Assert(d != NULL && s != NULL);
     (decls=d)->SetParentAll(this);
