@@ -214,7 +214,9 @@ void ReturnStmt::PrintChildren(int indentLevel) {
 }
 
 Type* ReturnStmt::Check(Symtab *S) {
-    expr->Check(S);
+    Type * t = expr->Check(S);
+    if (!(t->IsEquivalentTo(Node::CurFunc->getReturnType())))
+        ReportError::ReturnMismatch(this,t,Node::CurFunc->getReturnType());
     return NULL;
 }
 SwitchLabel::SwitchLabel(Expr *l, Stmt *s) {

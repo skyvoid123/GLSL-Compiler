@@ -45,6 +45,7 @@
 using namespace std;
 
 class Type;
+class FnDecl;
 
 class Node  {
   protected:
@@ -54,6 +55,7 @@ class Node  {
   public:
     Node(yyltype loc);
     Node();
+    static FnDecl* CurFunc;
     virtual ~Node() {}
     
     yyltype *GetLocation()   { return location; }

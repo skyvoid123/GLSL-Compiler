@@ -42,6 +42,7 @@ Type* VarDecl::Check(Symtab *S) {
 }
 
 Type* FnDecl::Check(Symtab *S) {
+    Node::CurFunc = this;
     for (int i = 0 ; i < formals->NumElements(); i++) {
         formals->Nth(i)->Add(S);
     }

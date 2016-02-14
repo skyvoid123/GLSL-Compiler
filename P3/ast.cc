@@ -8,6 +8,8 @@
 #include <string.h> // strdup
 #include <stdio.h>  // printf
 
+FnDecl* Node::CurFunc = NULL;
+
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
     parent = NULL;
