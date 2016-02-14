@@ -51,6 +51,8 @@ class StmtBlock : public Stmt
     
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
+    int getSize() { return stmts->NumElements(); }
+    Stmt* getStmt(int i) { return stmts->Nth(i); }
     const char *GetPrintNameForNode() { return "StmtBlock"; }
     void PrintChildren(int indentLevel);
     Type* Check(Symtab *S);

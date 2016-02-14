@@ -214,6 +214,15 @@ void ReturnStmt::PrintChildren(int indentLevel) {
 }
 
 Type* ReturnStmt::Check(Symtab *S) {
+    if( expr == NULL ) {
+      if(Node::CurFunc->getReturnType()->IsEquivalentTo(Type::voidType)) {
+        return NULL;
+      } else {
+        ReportError::ReturnMismatch(this, Type::voidType, 
+		Node::CurFunc->getReturnType());
+        return NULL;
+      }
+    } 
     Type * t = expr->Check(S);
     if (!(t->IsEquivalentTo(Node::CurFunc->getReturnType())))
         ReportError::ReturnMismatch(this,t,Node::CurFunc->getReturnType());

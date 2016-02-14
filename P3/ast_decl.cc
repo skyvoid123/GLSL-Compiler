@@ -5,7 +5,7 @@
 #include "ast_decl.h"
 #include "ast_type.h"
 #include "ast_stmt.h"
-        
+#include "errors.h"        
          
 Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
     Assert(n != NULL);
@@ -50,6 +50,21 @@ Type* FnDecl::Check(Symtab *S) {
         formals->Nth(i)->Check(S);
     }
     body->Check(S);
+    if( returnType->IsEquivalentTo(Type::voidType) ) {
+      return NULL;
+    }
+    if  (StmtBlock* b = dynamic_cast<StmtBlock*>(body)) {
+      for(int i = 0; i< b->getSize(); i++) {
+        if( ReturnStmt* r = dynamic_cast<ReturnStmt*>(b->getStmt(i)) ) {
+          return NULL;
+        }
+      }
+      ReportError::ReturnMissing(this);
+    } else if (ReturnStmt* r = dynamic_cast<ReturnStmt*>(this)) {
+    
+    } else {
+      ReportError::ReturnMissing(this);
+    }
     return NULL;
 }
 FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
