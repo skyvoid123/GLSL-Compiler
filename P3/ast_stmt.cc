@@ -26,14 +26,16 @@ Type* Program::Check() {
      *      checking itself, which makes for a great use of inheritance
      *      and polymorphism in the node classes.
      */
-    PrintChildren(0);
+    //PrintChildren(0);
     Symtab *S = new Symtab();
     S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Add(S);
     }
     for (int i = 0; i < decls->NumElements(); i++) {
+        S->enterScope();
         decls->Nth(i)->Check(S);
+        S->exitScope();
     }
     S->exitScope();
     return NULL;
@@ -73,15 +75,16 @@ void StmtBlock::PrintChildren(int indentLevel) {
 
 Type* StmtBlock::Check(Symtab *S) {
     for (int i = 0; i < decls->NumElements(); i++) {
-        decls->Nth(i)->Check(S);
+        decls->Nth(i)->Add(S);
     }
     for (int i = 0; i < decls->NumElements(); i++) {
+        S->enterScope();
         decls->Nth(i)->Check(S);
+        S->exitScope();
     }
     for (int i = 0; i < stmts->NumElements(); i++) {
         stmts->Nth(i)->Check(S);
     }
-    S->printTable();
     return NULL;
 }
 DeclStmt::DeclStmt(Decl *d) {
@@ -91,7 +94,9 @@ DeclStmt::DeclStmt(Decl *d) {
 
 Type* DeclStmt::Check(Symtab *S) {
     decl->Add(S);
+    S->enterScope();
     decl->Check(S);
+    S->exitScope();
     return NULL;
 }
 
@@ -139,11 +144,13 @@ void ForStmt::PrintChildren(int indentLevel) {
 }
 
 Type* ForStmt::Check(Symtab *S) {
+    S->enterScope();
     init->Check(S);
-    if (test->Check(S)->IsEquivalentTo(Type::boolType))
-        cout << "Condition for stmt" << endl;
+    if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
+        ReportError::TestNotBoolean(test);
     step->Check(S);
     body->Check(S);
+    S->exitScope();
     return NULL;
 }
 
@@ -153,9 +160,11 @@ void WhileStmt::PrintChildren(int indentLevel) {
 }
 
 Type* WhileStmt::Check(Symtab *S) {
-    if (test->Check(S)->IsEquivalentTo(Type::boolType))
-        cout << "Condition for while stmt error" << endl;
+    S->enterScope();
+    if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
+        ReportError::TestNotBoolean(test);
     body->Check(S);
+    S->exitScope();
     return NULL;
 }
 
@@ -173,8 +182,13 @@ void IfStmt::PrintChildren(int indentLevel) {
 
 Type* IfStmt::Check(Symtab *S) {
     test->Check(S);
+    S->enterScope();
     body->Check(S);
+    S->exitScope();
+    S->enterScope();
     elseBody->Check(S);
+    S->exitScope();
+    S->exitScope();
     return NULL;
 }
 Type* BreakStmt::Check(Symtab *S) {
@@ -227,6 +241,8 @@ Type* SwitchLabel::Check(Symtab *S) {
 }
 
 Type* Case::Check(Symtab *S) {
+    if (this == NULL)
+        return NULL;
     label->Check(S);
     stmt->Check(S);
     return NULL;
@@ -251,11 +267,14 @@ void SwitchStmt::PrintChildren(int indentLevel) {
 }
 
 Type* SwitchStmt::Check(Symtab *S) {
+    S->enterScope();
     expr->Check(S);
     for (int i = 0; i < cases->NumElements(); i++) {
         cases->Nth(i)->Check(S);
     }
-    def->Check(S);
+    if (def != NULL)
+        def->Check(S);
+    S->exitScope();
     return NULL;
 }
 

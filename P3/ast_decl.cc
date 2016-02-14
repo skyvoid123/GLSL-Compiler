@@ -42,7 +42,6 @@ Type* VarDecl::Check(Symtab *S) {
 }
 
 Type* FnDecl::Check(Symtab *S) {
-    S->enterScope();
     for (int i = 0 ; i < formals->NumElements(); i++) {
         formals->Nth(i)->Add(S);
     }
@@ -50,7 +49,6 @@ Type* FnDecl::Check(Symtab *S) {
         formals->Nth(i)->Check(S);
     }
     body->Check(S);
-    S->exitScope();
     return NULL;
 }
 FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {

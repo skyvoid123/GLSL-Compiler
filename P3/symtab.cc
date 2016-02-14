@@ -42,7 +42,7 @@ Decl* Symtab::find(Decl* var, int x) {
 }
 
 Type* Symtab::findType(Decl* var) {
-    for (int i = levelNumber - 1; i >= 0; i++) {
+    for (int i = levelNumber - 1; i >= 0; i--) {
         map<Decl*, Type*> currMap = *table->at(i);
         for (map<Decl*,Type*>::iterator it=currMap.begin();it!=currMap.end();++it) {
             if (comparator(it->first, var)) 
