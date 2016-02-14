@@ -149,7 +149,8 @@ Type* ForStmt::Check(Symtab *S) {
     init->Check(S);
     if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
         ReportError::TestNotBoolean(test);
-    step->Check(S);
+    if (step != NULL)
+        step->Check(S);
     body->Check(S);
     S->exitScope();
     Node::loopCount--;
@@ -251,8 +252,6 @@ Type* SwitchLabel::Check(Symtab *S) {
 }
 
 Type* Case::Check(Symtab *S) {
-    if (this == NULL)
-        return NULL;
     label->Check(S);
     stmt->Check(S);
     return NULL;
