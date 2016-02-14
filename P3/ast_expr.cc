@@ -190,7 +190,18 @@ Type* RelationalExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   // ReportError::IncompatibleOperands(op, left, right);   
   // }
-  return NULL;
+  Type* t1 = NULL;
+  Type* t2 = NULL;
+  std::string t1Type(t1->getTypeName());
+  std::string t2Type(t2->getTypeName());
+  if( t1Type == "int" && t2Type == "int" ) {
+
+  } else if( t1Type == "float" && t2Type == "float" ) {
+ 
+  } else {
+    return Type::errorType;
+  }
+    return Type::boolType;
 }
   
 Type* EqualityExpr::Check(Symtab *S) {
@@ -200,7 +211,13 @@ Type* EqualityExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   //  ReportError::IncompatibleOperands(op, left, right);
   // }
-  return NULL;
+  Type* t1 = NULL;
+  Type* t2 = NULL;
+  if( t1->getTypeName() == t2->getTypeName() ) {
+    return Type::boolType;
+  } else {
+    return Type::errorType;
+  }
 }
 
 Type* LogicalExpr::Check(Symtab *S) {
@@ -210,7 +227,15 @@ Type* LogicalExpr::Check(Symtab *S) {
   //    if(cmp == 0) {
   //        ReportError::IncompatibleOperands(op, left, right);
   //          }
-  return NULL;
+  Type* t1 = NULL;
+  Type* t2 = NULL;
+  std::string t1Type(t1->getTypeName());
+  std::string t2Type(t2->getTypeName());
+  if( t1Type == "bool" && t2Type == "bool") {
+    return Type::boolType;
+  } else {
+    return Type::errorType;
+  }
 }
 Type* AssignExpr::Check(Symtab *S) {
   //TODO: dunno if this is gonna worK
