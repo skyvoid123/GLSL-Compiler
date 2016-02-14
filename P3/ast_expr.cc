@@ -157,7 +157,8 @@ Type* ArithmeticExpr::Check(Symtab *S) {
     return Type::errorType;
   }
   // Check compatibility
-  if( t1->IsEquivalentTo(t2) ) {
+  if( !t1->IsEquivalentTo(t2) ) {
+    printf("not equiv\n");
     // float compatible with vec and mat, return the vec/mat
     if( t1->IsEquivalentTo(Type::floatType)) {
       if( t2->IsEquivalentTo(Type::vec2Type) ) {
@@ -173,10 +174,12 @@ Type* ArithmeticExpr::Check(Symtab *S) {
       } else if( t2->IsEquivalentTo(Type::mat4Type) ) {
         return Type::mat4Type;
       } else {
+        ReportError::IncompatibleOperands(op, t1, t2);
         return Type::errorType;
       }
 
     } else if( t2->IsEquivalentTo(Type::floatType)) {
+      printf("t2 is float\n");
       if( t1->IsEquivalentTo(Type::vec2Type) ) {
         return Type::vec2Type;
       } else if( t1->IsEquivalentTo(Type::vec3Type) ) {
@@ -190,6 +193,7 @@ Type* ArithmeticExpr::Check(Symtab *S) {
       } else if( t1->IsEquivalentTo(Type::mat4Type) ) {
         return Type::mat4Type;
       } else {
+        ReportError::IncompatibleOperands(op, t1, t2);
         return Type::errorType;
       }
     // If op is *, then can vec can match with mat of equal size, returns vec
