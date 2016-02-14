@@ -20,6 +20,7 @@ class Symtab {
         bool insert(pair<Decl*, Type*>);
         bool find(Decl*, int);
         bool find(Decl*);
+        Type* findType(Decl*);
         void exitScope();
         void printTable(int);
         void printTable();

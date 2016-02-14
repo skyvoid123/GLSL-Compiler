@@ -31,7 +31,8 @@ class Decl : public Node
   public:
     Decl() : id(NULL) {}
     Decl(Identifier *name);
-    Type* Check(Symtab *S);
+    virtual Type* Check(Symtab *S);
+    void Add(Symtab *S);
     const char* getId() { return id->getName(); }
     friend ostream& operator<<(ostream& out, Decl *d) { return out << d->id; }
 };

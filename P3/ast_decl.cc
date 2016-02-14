@@ -24,7 +24,18 @@ void VarDecl::PrintChildren(int indentLevel) {
 }
 
 Type* Decl::Check(Symtab *S) {
-  return NULL;
+    if (VarDecl* v = dynamic_cast<VarDecl*>(this))
+        v->Check(S);
+    else if (FnDecl* f = dynamic_cast<FnDecl*>(this))
+        f->Check(S);
+    return NULL;
+}
+
+void Decl::Add(Symtab *S) {
+    if (VarDecl* v = dynamic_cast<VarDecl*>(this))
+        S->insert(make_pair(v,v->getType()));
+    else if (FnDecl* f = dynamic_cast<FnDecl*>(this))
+        S->insert(make_pair(f, f->getReturnType()));
 }
 Type* VarDecl::Check(Symtab *S) {
   return NULL;
