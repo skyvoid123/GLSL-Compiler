@@ -31,10 +31,10 @@ void Program::Check() {
     S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
         if (VarDecl *v = dynamic_cast<VarDecl*>(decls->Nth(i))) {
-            S->insert(make_pair(v->getId(), v->getType()));
+            S->insert(make_pair(v, v->getType()));
         }
         else if (FnDecl *f = dynamic_cast<FnDecl*>(decls->Nth(i))) {
-            S->insert(make_pair(f->getId(), f->getReturnType()));
+            S->insert(make_pair(f, f->getReturnType()));
         }
     }
     for (int i = 0; i < decls->NumElements(); i++) {
@@ -58,7 +58,7 @@ void StmtBlock::PrintChildren(int indentLevel) {
 void StmtBlock::Check(Symtab *S) {
     for (int i = 0; i < decls->NumElements(); i++) {
         VarDecl* v = decls->Nth(i);
-        S->insert(make_pair(v->getId(), v->getType()));
+        S->insert(make_pair(v, v->getType()));
     }
     for (int i = 0; i < decls->NumElements(); i++) {
         decls->Nth(i)->Check(S);
@@ -77,10 +77,10 @@ DeclStmt::DeclStmt(Decl *d) {
 
 void DeclStmt::Check(Symtab *S) {
     if (VarDecl *v = dynamic_cast<VarDecl*>(decl)) {
-        S->insert(make_pair(v->getId(), v->getType()));
+        S->insert(make_pair(v, v->getType()));
     }
     else if (FnDecl *f = dynamic_cast<FnDecl*>(decl)) {
-        S->insert(make_pair(f->getId(), f->getReturnType()));
+        S->insert(make_pair(f, f->getReturnType()));
     }
     decl->Check(S);
 }
