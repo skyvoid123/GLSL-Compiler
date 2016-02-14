@@ -9,9 +9,36 @@
 #include "ast_decl.h"
 #include "errors.h"
 
+
+Type* ExprError::Check(Symtab* S) {
+  return Type::errorType;
+}
+
+Type* EmptyExpr::Check(Symtab* S) {
+  return NULL;
+}
+
+Type* IntConstant::Check(Symtab* S) {
+  return Type::intType;
+}
+
+Type* FloatConstant::Check(Symtab* S) {
+  return Type::floatType;
+}
+
+Type* BoolConstant::Check(Symtab* S) {
+  return Type::boolType;
+}
+
+Type* VarExpr::Check(Symtab* S) {
+  Decl* findMe = new Decl(id);
+  return S->findType(findMe);
+}
+
 IntConstant::IntConstant(yyltype loc, int val) : Expr(loc) {
     value = val;
 }
+
 void IntConstant::PrintChildren(int indentLevel) { 
     printf("%d", value);
 }
@@ -199,6 +226,7 @@ Type* RelationalExpr::Check(Symtab *S) {
   } else if( t1Type == "float" && t2Type == "float" ) {
  
   } else {
+    ReportError::IncompatibleOperands(op, t1, t2);
     return Type::errorType;
   }
     return Type::boolType;
@@ -216,6 +244,7 @@ Type* EqualityExpr::Check(Symtab *S) {
   if( t1->getTypeName() == t2->getTypeName() ) {
     return Type::boolType;
   } else {
+    ReportError::IncompatibleOperands(op, t1, t2);
     return Type::errorType;
   }
 }
@@ -234,6 +263,7 @@ Type* LogicalExpr::Check(Symtab *S) {
   if( t1Type == "bool" && t2Type == "bool") {
     return Type::boolType;
   } else {
+    ReportError::IncompatibleOperands(op, t1, t2);
     return Type::errorType;
   }
 }
@@ -244,7 +274,16 @@ Type* AssignExpr::Check(Symtab *S) {
   //if(cmp == 0) {
   //  ReportError::IncompatibleOperands(op, left, right);
   //}
-  return NULL;
+  Type* t1 = NULL;
+  Type* t2 = NULL;
+  std::string t1Type(t1->getTypeName());
+  std::string t2Type(t2->getTypeName());
+  if( t1Type == t2Type) {
+    return t1;
+  } else {
+    ReportError::IncompatibleOperands(op, t1, t2);
+    return Type::errorType;
+  }
 }
 
 Type* PostfixExpr::Check(Symtab *S) {
@@ -253,7 +292,28 @@ Type* PostfixExpr::Check(Symtab *S) {
   //if( type == "bool" || type == "void" ) {
   // ReportError::IncompatibleOperand(op, left);
   //}
-  return NULL;
+  Type* t1 = NULL;
+  std::string t1Type(t1->getTypeName());
+  if( t1Type == "int" ) {
+    return Type::intType;
+  } else if( t1Type == "float" ) {
+    return Type::floatType;
+  } else if( t1Type == "vec2" ) { 
+    return Type::vec2Type;
+  } else if ( t1Type == "vec3" ) {
+     return Type::vec3Type;
+  } else if ( t1Type == "vec4" ) {
+     return Type::vec4Type;
+  } else if ( t1Type == "mat2" ) {
+     return Type::mat2Type;
+  } else if ( t1Type == "mat3" ) {
+     return Type::mat3Type;
+  } else if ( t1Type == "mat4" ) {
+     return Type::mat4Type;
+  } else {
+    ReportError::IncompatibleOperand(op, t1);
+    return Type::errorType;
+  }
 }
 
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
