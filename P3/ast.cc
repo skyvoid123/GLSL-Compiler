@@ -9,6 +9,8 @@
 #include <stdio.h>  // printf
 
 FnDecl* Node::CurFunc = NULL;
+int Node::loopCount = 0;
+int Node::swCount = 0;
 
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
