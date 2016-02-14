@@ -144,6 +144,7 @@ void ForStmt::PrintChildren(int indentLevel) {
 }
 
 Type* ForStmt::Check(Symtab *S) {
+    Node::loopCount++;
     S->enterScope();
     init->Check(S);
     if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
@@ -151,6 +152,7 @@ Type* ForStmt::Check(Symtab *S) {
     step->Check(S);
     body->Check(S);
     S->exitScope();
+    Node::loopCount--;
     return NULL;
 }
 
@@ -160,11 +162,13 @@ void WhileStmt::PrintChildren(int indentLevel) {
 }
 
 Type* WhileStmt::Check(Symtab *S) {
+    Node::loopCount++;
     S->enterScope();
     if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
         ReportError::TestNotBoolean(test);
     body->Check(S);
     S->exitScope();
+    Node::loopCount--;
     return NULL;
 }
 
@@ -194,12 +198,14 @@ Type* IfStmt::Check(Symtab *S) {
     return NULL;
 }
 Type* BreakStmt::Check(Symtab *S) {
-    cout << "BREAK" << endl;
+    if (Node::loopCount <= 0 && Node::swCount <= 0)
+        ReportError::BreakOutsideLoop(this);
     return NULL;   
 }
 
 Type* ContinueStmt::Check(Symtab *S) {
-    cout << "CONTINUE" << endl;
+    if (Node::loopCount <= 0)
+        ReportError::ContinueOutsideLoop(this);
     return NULL;
 }
 
@@ -271,6 +277,7 @@ void SwitchStmt::PrintChildren(int indentLevel) {
 }
 
 Type* SwitchStmt::Check(Symtab *S) {
+    Node::swCount++;
     S->enterScope();
     expr->Check(S);
     for (int i = 0; i < cases->NumElements(); i++) {
@@ -279,6 +286,7 @@ Type* SwitchStmt::Check(Symtab *S) {
     if (def != NULL)
         def->Check(S);
     S->exitScope();
+    Node::swCount--;
     return NULL;
 }
 

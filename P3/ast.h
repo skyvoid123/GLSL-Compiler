@@ -56,6 +56,8 @@ class Node  {
     Node(yyltype loc);
     Node();
     static FnDecl* CurFunc;
+    static int loopCount;
+    static int swCount;
     virtual ~Node() {}
     
     yyltype *GetLocation()   { return location; }
