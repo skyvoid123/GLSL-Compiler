@@ -207,6 +207,7 @@ class FieldAccess : public LValue
     
   public:
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
+    Type* Check(Symtab* S);
     const char *GetPrintNameForNode() { return "FieldAccess"; }
     void PrintChildren(int indentLevel);
 };
