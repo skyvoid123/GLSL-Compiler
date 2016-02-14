@@ -43,6 +43,7 @@ Type* VarDecl::Check(Symtab *S) {
 
 Type* FnDecl::Check(Symtab *S) {
     Node::CurFunc = this;
+    Node::retCount = 0;
     for (int i = 0 ; i < formals->NumElements(); i++) {
         formals->Nth(i)->Add(S);
     }
@@ -53,6 +54,8 @@ Type* FnDecl::Check(Symtab *S) {
     if( returnType->IsEquivalentTo(Type::voidType) ) {
       return NULL;
     }
+    if (Node::retCount > 0)
+        return NULL;
     if  (StmtBlock* b = dynamic_cast<StmtBlock*>(body)) {
       for(int i = 0; i< b->getSize(); i++) {
         if( ReturnStmt* r = dynamic_cast<ReturnStmt*>(b->getStmt(i)) ) {

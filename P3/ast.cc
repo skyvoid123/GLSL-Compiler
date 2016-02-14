@@ -11,6 +11,7 @@
 FnDecl* Node::CurFunc = NULL;
 int Node::loopCount = 0;
 int Node::swCount = 0;
+int Node::retCount = 0;
 
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
