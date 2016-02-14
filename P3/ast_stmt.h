@@ -20,7 +20,7 @@ class Decl;
 class VarDecl;
 class Expr;
 class IntConstant;
-  
+
 void yyerror(const char *msg);
 
 class Program : public Node
@@ -32,7 +32,7 @@ class Program : public Node
      Program(List<Decl*> *declList);
      const char *GetPrintNameForNode() { return "Program"; }
      void PrintChildren(int indentLevel);
-     void Check();
+     Type* Check();
 };
 
 class Stmt : public Node
@@ -52,7 +52,7 @@ class StmtBlock : public Stmt
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
     const char *GetPrintNameForNode() { return "StmtBlock"; }
     void PrintChildren(int indentLevel);
-    void Check(Symtab *S);
+    Type* Check(Symtab *S);
 };
 
 class DeclStmt: public Stmt 
@@ -63,7 +63,7 @@ class DeclStmt: public Stmt
   public:
     DeclStmt(Decl *d);
     const char *GetPrintNameForNode() { return "DeclStmt"; }
-    void Check(Symtab *S);
+    Type* Check(Symtab *S);
     void PrintChildren(int indentLevel);
 };
   

@@ -97,6 +97,7 @@ class Operator : public Node
     
   public:
     Operator(yyltype loc, const char *tok);
+    char* getOp();
     const char *GetPrintNameForNode() { return "Operator"; }
     void PrintChildren(int indentLevel);
     friend ostream& operator<<(ostream& out, Operator *o) { return out << o->tokenString; }
@@ -120,7 +121,7 @@ class ArithmeticExpr : public CompoundExpr
   public:
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
 };
 
@@ -128,7 +129,7 @@ class RelationalExpr : public CompoundExpr
 {
   public:
     RelationalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "RelationalExpr"; }
 };
 
@@ -136,7 +137,7 @@ class EqualityExpr : public CompoundExpr
 {
   public:
     EqualityExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "EqualityExpr"; }
 };
 
@@ -145,7 +146,7 @@ class LogicalExpr : public CompoundExpr
   public:
     LogicalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     LogicalExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "LogicalExpr"; }
 };
 
@@ -153,7 +154,7 @@ class AssignExpr : public CompoundExpr
 {
   public:
     AssignExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "AssignExpr"; }
 };
 
@@ -161,7 +162,7 @@ class PostfixExpr : public CompoundExpr
 {
   public:
     PostfixExpr(Expr *lhs, Operator *op) : CompoundExpr(lhs,op) {}
-    Type Check(Symtab *S);
+    Type* Check(Symtab *S);
     const char *GetPrintNameForNode() { return "PostfixExpr"; }
 };
 
