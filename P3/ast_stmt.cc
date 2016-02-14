@@ -18,6 +18,11 @@ void Program::PrintChildren(int indentLevel) {
     printf("\n");
 }
 
+Type* Stmt::Check(Symtab *S) {
+    if (StmtBlock *s = dynamic_cast<StmtBlock*>(this)) {
+        s->Check(S);
+    }
+}
 Type* Program::Check() {
     /* pp3: here is where the semantic analyzer is kicked off.
      *      The general idea is perform a tree traversal of the

@@ -39,9 +39,7 @@ Type* FnDecl::Check(Symtab *S) {
     for (int i = 0; i < formals->NumElements(); i++) {
         formals->Nth(i)->Check(S);
     }
-    if (StmtBlock *s = dynamic_cast<StmtBlock*>(body)) {
-        s->Check(S);
-    }
+    body->Check(S);
     S->exitScope();
     return NULL;
 }
