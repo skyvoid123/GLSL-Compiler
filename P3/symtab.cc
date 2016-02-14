@@ -21,17 +21,29 @@ bool Symtab::insert(pair<Decl*,Type*> var) {
         return false;
     }
     cout << "inserting " << var.first << endl;
+    if (find(var.first, levelNumber - 1)) {
+        cout << "DECLARATION CONLICT" << endl;
+        return false;
+    }
     pair<map<Decl*, Type*>::iterator, bool> ret;
-    ret = table->at(levelNumber - 1)->insert(var);
-    //TODO: declaration conflict
-    if (!ret.second)
-        cout << "DECLARATION CONFLICT" << endl;
-    return ret.second;
+    table->at(levelNumber - 1)->insert(var);
+    return true;
 }
 
+bool comparator(Decl* a, Decl* b) {
+    return (strcmp(a->getId(),b->getId()) == 0);
+}
+bool Symtab::find(Decl* var, int x) {
+    map<Decl*, Type*> currMap = *table->at(x);
+    for (map<Decl*,Type*>::iterator it=currMap.begin();it!=currMap.end();++it) {
+        if (comparator(it->first, var)) 
+            return true;
+    }
+    return false;
+}
 bool Symtab::find(Decl* var) {
     for (int i = levelNumber - 1; i >= 0; i++) {
-        if (table->at(i)->count(var) == 1)
+        if (find(var, i))
             return true;
     }
     //TODO: No declaration Error

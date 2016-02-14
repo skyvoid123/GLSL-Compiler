@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <string.h>
 using namespace std;
 
 class Type;
@@ -17,6 +18,7 @@ class Symtab {
         int getLevelNumber();
         void enterScope();
         bool insert(pair<Decl*, Type*>);
+        bool find(Decl*, int);
         bool find(Decl*);
         void exitScope();
         void printTable(int);
