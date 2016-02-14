@@ -6,16 +6,18 @@
 #include <map>
 using namespace std;
 
+class Type;
+class Decl;
 class Symtab {
     protected:
-        vector<map<string, string>*> *table;
+        vector<map<Decl*, Type*>*> *table;
         int levelNumber;
     public:
         Symtab();
         int getLevelNumber();
         void enterScope();
-        bool insert(pair<string,string>);
-        bool find(string);
+        bool insert(pair<Decl*, Type*>);
+        bool find(Decl*);
         void exitScope();
         void printTable(int);
         void printTable();

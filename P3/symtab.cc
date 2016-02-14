@@ -2,7 +2,7 @@
 #include "symtab.h"
 
 Symtab::Symtab() {
-    table = new vector<map<string, string>*>();
+    table = new vector<map<Decl*, Type*>*>();
     levelNumber = 0;
 }
 
@@ -11,17 +11,17 @@ int Symtab::getLevelNumber() {
 }
 
 void Symtab::enterScope() {
-    table->push_back(new map<string,string>());
+    table->push_back(new map<Decl*,Type*>());
     levelNumber++;
 }
 
-bool Symtab::insert(pair<string,string> var) {
+bool Symtab::insert(pair<Decl*,Type*> var) {
     if (levelNumber <= 0) {
         cout << "No Scope" << endl;
         return false;
     }
     cout << "inserting " << var.first << endl;
-    pair<map<string, string>::iterator, bool> ret;
+    pair<map<Decl*, Type*>::iterator, bool> ret;
     ret = table->at(levelNumber - 1)->insert(var);
     //TODO: declaration conflict
     if (!ret.second)
@@ -29,7 +29,7 @@ bool Symtab::insert(pair<string,string> var) {
     return ret.second;
 }
 
-bool Symtab::find(string var) {
+bool Symtab::find(Decl* var) {
     for (int i = levelNumber - 1; i >= 0; i++) {
         if (table->at(i)->count(var) == 1)
             return true;
@@ -49,12 +49,12 @@ void Symtab::printTable(int x) {
         cout << x << " Invalid Level" << endl;
         return;
     }
-    map<string, string> currMap = *table->at(x);
+    map<Decl*, Type*> currMap = *table->at(x);
     if (currMap.empty()) {
         cout << "EMPTY LEVEL" << endl;
         return;
     }
-    for (map<string,string>::iterator it = currMap.begin(); it!=currMap.end(); ++it)
+    for (map<Decl*, Type*>::iterator it = currMap.begin(); it!=currMap.end(); ++it)
         cout << it->first << " => " << it->second << endl;
 }
 

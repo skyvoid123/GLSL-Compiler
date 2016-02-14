@@ -31,7 +31,7 @@ void FnDecl::Check(Symtab *S) {
     S->enterScope();
     for (int i = 0 ; i < formals->NumElements(); i++) {
         VarDecl *v = formals->Nth(i);
-        S->insert(make_pair(v->getId(), v->getType()));
+        S->insert(make_pair(v, v->getType()));
     }
     for (int i = 0; i < formals->NumElements(); i++) {
         formals->Nth(i)->Check(S);
