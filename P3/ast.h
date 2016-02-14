@@ -40,7 +40,6 @@
 #include <stdlib.h>   // for NULL
 #include "location.h"
 #include "symtab.h"
-//#include "errors.h"
 #include <iostream>
 
 using namespace std;

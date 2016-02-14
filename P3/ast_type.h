@@ -15,6 +15,7 @@
 #include "ast.h"
 #include "list.h"
 #include <iostream>
+#include "error.h"
 
 using namespace std;
 

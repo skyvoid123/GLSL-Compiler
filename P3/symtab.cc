@@ -20,12 +20,10 @@ bool Symtab::insert(pair<Decl*,Type*> var) {
         cout << "No Scope" << endl;
         return false;
     }
-    cout << "inserting " << var.first << endl;
-    if (find(var.first, levelNumber - 1)) {
-        cout << "DECLARATION CONLICT" << endl;
+    if (Decl* temp = (find(var.first, levelNumber - 1))) {
+        ReportError::DeclConflict(var.first, temp);
         return false;
     }
-    pair<map<Decl*, Type*>::iterator, bool> ret;
     table->at(levelNumber - 1)->insert(var);
     return true;
 }
@@ -33,13 +31,14 @@ bool Symtab::insert(pair<Decl*,Type*> var) {
 bool comparator(Decl* a, Decl* b) {
     return (strcmp(a->getId(),b->getId()) == 0);
 }
-bool Symtab::find(Decl* var, int x) {
+
+Decl* Symtab::find(Decl* var, int x) {
     map<Decl*, Type*> currMap = *table->at(x);
     for (map<Decl*,Type*>::iterator it=currMap.begin();it!=currMap.end();++it) {
         if (comparator(it->first, var)) 
-            return true;
+            return it->first;
     }
-    return false;
+    return NULL;
 }
 
 Type* Symtab::findType(Decl* var) {
@@ -50,6 +49,8 @@ Type* Symtab::findType(Decl* var) {
                 return it->second;
         }
     }
+    ReportError::IdentifierNotDeclared(var->getIdentifier(),
+                                       LookingForVariable);
     return NULL;
 }
 bool Symtab::find(Decl* var) {
@@ -58,7 +59,8 @@ bool Symtab::find(Decl* var) {
             return true;
     }
     //TODO: No declaration Error
-    cout << "NO DECLARATION ERROR" << endl;
+    ReportError::IdentifierNotDeclared(var->getIdentifier(), 
+                                       LookingForVariable);
     return false;
 }
 
