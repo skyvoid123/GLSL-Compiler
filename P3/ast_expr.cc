@@ -9,6 +9,13 @@
 #include "ast_decl.h"
 #include "errors.h"
 
+Type* Expr::Check(Symtab* S) {
+  cout << "B" << endl;
+  if(FieldAccess *f = dynamic_cast<FieldAccess*>(this)) {
+    f->Check(S);
+  }
+  return NULL;
+}
 Type* ExprError::Check(Symtab* S) {
   return Type::errorType;
 }
@@ -329,6 +336,7 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 
 
 Type* FieldAccess::Check(Symtab* S) {
+  cout << "hi" << endl;
   Type* t1 = base->Check(S);
   std::string t1Type(t1->getTypeName());
   // I made a char* and string, just cuz
