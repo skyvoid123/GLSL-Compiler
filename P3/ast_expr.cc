@@ -158,7 +158,6 @@ Type* ArithmeticExpr::Check(Symtab *S) {
   }
   // Check compatibility
   if( !t1->IsEquivalentTo(t2) ) {
-    printf("not equiv\n");
     // float compatible with vec and mat, return the vec/mat
     if( t1->IsEquivalentTo(Type::floatType)) {
       if( t2->IsEquivalentTo(Type::vec2Type) ) {
@@ -179,7 +178,6 @@ Type* ArithmeticExpr::Check(Symtab *S) {
       }
 
     } else if( t2->IsEquivalentTo(Type::floatType)) {
-      printf("t2 is float\n");
       if( t1->IsEquivalentTo(Type::vec2Type) ) {
         return Type::vec2Type;
       } else if( t1->IsEquivalentTo(Type::vec3Type) ) {
@@ -226,6 +224,10 @@ Type* ArithmeticExpr::Check(Symtab *S) {
 Type* RelationalExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
+  // Check if t1 or t2 is NULL
+  if( t1 == NULL || t2 == NULL ) {
+    return Type::errorType;
+  }
   // Check for error type, avoid kaskades
   if( t1->IsEquivalentTo(Type::errorType) || 
 		t2->IsEquivalentTo(Type::errorType) ) {
@@ -247,6 +249,10 @@ Type* RelationalExpr::Check(Symtab *S) {
 Type* EqualityExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
+  // Check if t1 or t2 is NULL
+  if( t1 == NULL || t2 == NULL ) {
+    return Type::errorType;
+  }
   // Check for error type, avoid kaskades
   if( t1->IsEquivalentTo(Type::errorType) || 
 		t2->IsEquivalentTo(Type::errorType) ) {
@@ -264,6 +270,10 @@ Type* EqualityExpr::Check(Symtab *S) {
 Type* LogicalExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
+  // Check if t1 or t2 is NULL
+  if( t1 == NULL || t2 == NULL ) {
+    return Type::errorType;
+  }
   // Check for error type, avoid kaskades
   if( t1->IsEquivalentTo(Type::errorType) || 
 		t2->IsEquivalentTo(Type::errorType) ) {
@@ -280,6 +290,10 @@ Type* LogicalExpr::Check(Symtab *S) {
 Type* AssignExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
   Type* t2 = right->Check(S);
+  // Check if t1 or t2 is NULL
+  if( t1 == NULL || t2 == NULL ) {
+    return Type::errorType;
+  }
   // Check for error type, avoid kaskades
   if( t1->IsEquivalentTo(Type::errorType) || 
 		t2->IsEquivalentTo(Type::errorType) ) {
@@ -296,6 +310,10 @@ Type* AssignExpr::Check(Symtab *S) {
 
 Type* PostfixExpr::Check(Symtab *S) {
   Type* t1 = left->Check(S);
+  // Check if t1 is NULL
+  if( t1 == NULL ) {
+    return Type::errorType;
+  }
   // Check for error type, avoid kaskades
   if( t1->IsEquivalentTo(Type::errorType) ) {
     return Type::errorType;
