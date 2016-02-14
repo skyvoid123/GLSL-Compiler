@@ -48,6 +48,16 @@ Type* Stmt::Check(Symtab *S) {
         sw->Check(S);
     else if (BreakStmt *b = dynamic_cast<BreakStmt*>(this))
         b->Check(S);
+    else if (ContinueStmt *co = dynamic_cast<ContinueStmt*>(this))
+        co->Check(S);
+    else if (ReturnStmt *r = dynamic_cast<ReturnStmt*>(this))
+        r->Check(S);
+    else if (ConditionalStmt *c = dynamic_cast<ConditionalStmt*>(this))
+        c->Check(S);
+    else if (SwitchStmt *ss = dynamic_cast<SwitchStmt*>(this))
+        ss->Check(S);
+    else if (Expr* e = dynamic_cast<Expr*>(this))
+        e->Check(S);
     return NULL;
 }
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
@@ -83,12 +93,7 @@ DeclStmt::DeclStmt(Decl *d) {
 }
 
 Type* DeclStmt::Check(Symtab *S) {
-    if (VarDecl *v = dynamic_cast<VarDecl*>(decl)) {
-        S->insert(make_pair(v, v->getType()));
-    }
-    else if (FnDecl *f = dynamic_cast<FnDecl*>(decl)) {
-        S->insert(make_pair(f, f->getReturnType()));
-    }
+    decl->Add(S);
     decl->Check(S);
     return NULL;
 }
@@ -102,6 +107,22 @@ ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) {
     Assert(t != NULL && b != NULL);
     (test=t)->SetParent(this); 
     (body=b)->SetParent(this);
+}
+
+Type* ConditionalStmt::Check(Symtab *S) {
+    if (LoopStmt* l = dynamic_cast<LoopStmt*>(this))
+        l->Check(S);
+    else if (IfStmt* i = dynamic_cast<IfStmt*>(this))
+        i->Check(S);
+    return NULL;
+}
+
+Type* LoopStmt::Check(Symtab *S) {
+    if (ForStmt* f = dynamic_cast<ForStmt*>(this))
+        f->Check(S);
+    else if (WhileStmt* w = dynamic_cast<WhileStmt*>(this))
+        w->Check(S);
+    return NULL;
 }
 
 ForStmt::ForStmt(Expr *i, Expr *t, Expr *s, Stmt *b): LoopStmt(t, b) { 
@@ -120,9 +141,25 @@ void ForStmt::PrintChildren(int indentLevel) {
     body->Print(indentLevel+1, "(body) ");
 }
 
+Type* ForStmt::Check(Symtab *S) {
+    init->Check(S);
+    if (test->Check(S)->IsEquivalentTo(Type::boolType))
+        cout << "Condition for stmt" << endl;
+    step->Check(S);
+    body->Check(S);
+    return NULL;
+}
+
 void WhileStmt::PrintChildren(int indentLevel) {
     test->Print(indentLevel+1, "(test) ");
     body->Print(indentLevel+1, "(body) ");
+}
+
+Type* WhileStmt::Check(Symtab *S) {
+    if (test->Check(S)->IsEquivalentTo(Type::boolType))
+        cout << "Condition for while stmt error" << endl;
+    body->Check(S);
+    return NULL;
 }
 
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) { 
@@ -137,6 +174,21 @@ void IfStmt::PrintChildren(int indentLevel) {
     if (elseBody) elseBody->Print(indentLevel+1, "(else) ");
 }
 
+Type* IfStmt::Check(Symtab *S) {
+    test->Check(S);
+    body->Check(S);
+    elseBody->Check(S);
+    return NULL;
+}
+Type* BreakStmt::Check(Symtab *S) {
+    cout << "BREAK" << endl;
+    return NULL;   
+}
+
+Type* ContinueStmt::Check(Symtab *S) {
+    cout << "CONTINUE" << endl;
+    return NULL;
+}
 
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) { 
     expr = e;
@@ -147,7 +199,11 @@ void ReturnStmt::PrintChildren(int indentLevel) {
     if ( expr ) 
       expr->Print(indentLevel+1);
 }
-  
+
+Type* ReturnStmt::Check(Symtab *S) {
+    expr->Check(S);
+    return NULL;
+}
 SwitchLabel::SwitchLabel(Expr *l, Stmt *s) {
     Assert(l != NULL && s != NULL);
     (label=l)->SetParent(this);
@@ -165,6 +221,24 @@ void SwitchLabel::PrintChildren(int indentLevel) {
     if (stmt)  stmt->Print(indentLevel+1);
 }
 
+Type* SwitchLabel::Check(Symtab *S) {
+    if (Case* ca = dynamic_cast<Case*>(this))
+        ca->Check(S);
+    else if (Default* de = dynamic_cast<Default*>(this))
+        de->Check(S);
+    return NULL;
+}
+
+Type* Case::Check(Symtab *S) {
+    label->Check(S);
+    stmt->Check(S);
+    return NULL;
+}
+
+Type* Default::Check(Symtab *S) {
+    stmt->Check(S);
+    return NULL;
+}
 SwitchStmt::SwitchStmt(Expr *e, List<Stmt *> *c, Default *d) {
     Assert(e != NULL && c != NULL && c->NumElements() != 0 );
     (expr=e)->SetParent(this);
@@ -177,5 +251,14 @@ void SwitchStmt::PrintChildren(int indentLevel) {
     if (expr) expr->Print(indentLevel+1);
     if (cases) cases->PrintAll(indentLevel+1);
     if (def) def->Print(indentLevel+1);
+}
+
+Type* SwitchStmt::Check(Symtab *S) {
+    expr->Check(S);
+    for (int i = 0; i < cases->NumElements(); i++) {
+        cases->Nth(i)->Check(S);
+    }
+    def->Check(S);
+    return NULL;
 }
 

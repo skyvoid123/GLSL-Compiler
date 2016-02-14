@@ -18,7 +18,7 @@ class Symtab {
         int getLevelNumber();
         void enterScope();
         bool insert(pair<Decl*, Type*>);
-        bool find(Decl*, int);
+        Decl* find(Decl*, int);
         bool find(Decl*);
         Type* findType(Decl*);
         void exitScope();
