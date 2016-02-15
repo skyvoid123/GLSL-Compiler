@@ -26,7 +26,7 @@ Type* Program::Check() {
      *      checking itself, which makes for a great use of inheritance
      *      and polymorphism in the node classes.
      */
-    //PrintChildren(0);
+    PrintChildren(0);
     Symtab *S = new Symtab();
     S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
@@ -188,6 +188,7 @@ void IfStmt::PrintChildren(int indentLevel) {
 Type* IfStmt::Check(Symtab *S) {
     if (!(test->Check(S)->IsEquivalentTo(Type::boolType)))
         ReportError::TestNotBoolean(test);
+        //cout << test->Check(S)->getTypeName() << " er "  << endl;
     S->enterScope();
     body->Check(S);
     S->exitScope();
@@ -221,6 +222,7 @@ void ReturnStmt::PrintChildren(int indentLevel) {
 }
 
 Type* ReturnStmt::Check(Symtab *S) {
+    Node::retCount++;
     if( expr == NULL ) {
       if(Node::CurFunc->getReturnType()->IsEquivalentTo(Type::voidType)) {
         return NULL;
