@@ -1,0 +1,33 @@
+Russell Chin
+A10653551
+Tony Luo
+A98063711
+
+For Declarations, there were 2 cases. For VarDecl we just added the variable to the map and the map would have return an error if it was already declared in the scope. For FnDecl we added the variable to the map and then proceeded to check the body of the function.
+For Statement, we did it so that the node would call check on its elements and then call check on itself. By calling check on itself it would dynamically cast itself to one of its children classes and see which one matches and then call the check for that children class. This helped us avoid to copy and paste all the dynamic cast since we only had to write it in the most top node which in this case was Stmt. Then we had to make sure that we were entering and exiting the scope at the right place. For that we just use the guidelines from the book on where the scope beings and ends for: for loops, while loops, if-else statements and swithes. Now the other concern was that the else in the if statmenets and the default in switch could be NULL, this threw off us for a bit until we realized that was the problem. To solve it we simply check if they are NULL before checking them. We also had to check that the test expression for while, if and for loops resolved to bools. To check for return statements, we made a static variable that keeps track of what function we are currently in and with that we cross reference with the type of the return and check that they are equal. Additionally, we keep track of the number of returns that the function has and if its less than 0 and the function isn't void then it will return an error. Finally we also keep track if the function is in a loop, or switch. In the case that they are not in a loop and we see a continue then an error gets thrown, on the other hand, if its not in a loop or a switch statements then break is not allowed.
+
+In Expressions, when constant expressions are checked, they return their
+respective types, error expressions return an error type, and empty expressions
+return NULL. Variable expressions use the symbol table to look up the type
+associated with it, returning its most recently declared type, in the event
+that the variable was not present in the symbol table, an undeclared identifier
+error is reported, and a NULL type is returned.  From there, compound 
+expressions their left and right operands in order to determine the types that 
+they are dealing with. In each Compound expression, the left and right types are
+checked for NULL, in the event that an undeclared variable error occured, when
+one of them is NULL, an error type is returned, additionally, if either the 
+left or right side is an error type, an error type is returned. No error is 
+reported in either of these cases in order to prevent cascading errors. After
+the preliminary checks are finished, each compound expression compares the
+types on its left and right side in order to determine if it follows the 
+specified grammar of GLSL. If it follows the proper grammar, the specified type
+is returned, if the operands are incompatible, an error is reported and error
+type is returned to avoid cascading errors. For arithmetic expressions, there
+is a case where the left operand is NULL in which case it contains a unary
+expression. In order to avoid calling check on a NULL, unary expressions are
+checked in the very begining of the arithmetic check functions. For FieldAccess,
+the swizzle errors are reported in the following order: Swizzle is called on a
+non-vector variable, swizzle contains characters outside of "xyzw", swizzle 
+characters are within the proper scope, swizzle length exceeds the maximum 
+expected length.
+
