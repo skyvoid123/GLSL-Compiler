@@ -1,0 +1,20 @@
+
+   Program: 
+  1   FnDecl: 
+         (return type) Type: float
+  1      Identifier: binky
+         (body) StmtBlock: 
+  3         VarDecl: 
+               Type: bool
+  3            Identifier: b
+            IfStmt: 
+  4            (test) ArithmeticExpr: 
+  4               FloatConstant: 1.5
+  4               Operator: *
+  4               BoolConstant: true
+               (then) StmtBlock: 
+  5               ArithmeticExpr: 
+  5                  VarExpr: 
+  5                     Identifier: b
+  5                  Operator: +
+  5                  IntConstant: 4

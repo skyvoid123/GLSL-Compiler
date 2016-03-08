@@ -1,0 +1,22 @@
+
+   Program: 
+  1   FnDecl: 
+         (return type) Type: void
+  1      Identifier: foo
+         (body) StmtBlock: 
+  2         VarDecl: 
+               Type: int
+  2            Identifier: i
+  3         VarDecl: 
+               Type: float
+  3            Identifier: f
+  4         AssignExpr: 
+  4            VarExpr: 
+  4               Identifier: i
+  4            Operator: =
+  4            IntConstant: 12345
+  5         AssignExpr: 
+  5            VarExpr: 
+  5               Identifier: f
+  5            Operator: =
+  5            FloatConstant: 123.456

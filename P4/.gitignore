@@ -1,3 +1,5 @@
 *.o
 glc
 sftp-config.json
+y.*
+*.yy.c

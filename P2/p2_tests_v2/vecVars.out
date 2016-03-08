@@ -1,0 +1,11 @@
+
+   Program: 
+  1   VarDecl: 
+         Type: vec2
+  1      Identifier: v1
+  2   VarDecl: 
+         Type: vec3
+  2      Identifier: v2
+  3   VarDecl: 
+         Type: vec4
+  3      Identifier: v3

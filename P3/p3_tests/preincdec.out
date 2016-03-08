@@ -1,0 +1,12 @@
+
+*** Error line 8.
+  ++b;
+     ^
+*** Incompatible operand: ++ bool
+
+
+*** Error line 9.
+  --b;
+     ^
+*** Incompatible operand: -- bool
+

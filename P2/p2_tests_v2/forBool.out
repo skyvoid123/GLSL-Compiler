@@ -1,0 +1,43 @@
+
+   Program: 
+  1   FnDecl: 
+         (return type) Type: void
+  1      Identifier: foo
+         (body) StmtBlock: 
+  2         VarDecl: 
+               Type: bool
+  2            Identifier: b
+  3         VarDecl: 
+               Type: int
+  3            Identifier: i
+  5         AssignExpr: 
+  5            VarExpr: 
+  5               Identifier: b
+  5            Operator: =
+  5            BoolConstant: true
+  6         AssignExpr: 
+  6            VarExpr: 
+  6               Identifier: i
+  6            Operator: =
+  6            IntConstant: 0
+            ForStmt: 
+  8            (init) AssignExpr: 
+  8               VarExpr: 
+  8                  Identifier: i
+  8               Operator: =
+  8               IntConstant: 1
+  8            (test) EqualityExpr: 
+  8               VarExpr: 
+  8                  Identifier: b
+  8               Operator: !=
+  8               BoolConstant: true
+  8            (step) PostfixExpr: 
+  8               VarExpr: 
+  8                  Identifier: i
+  8               Operator: ++
+               (body) StmtBlock: 
+  9               AssignExpr: 
+  9                  VarExpr: 
+  9                     Identifier: b
+  9                  Operator: =
+  9                  BoolConstant: false

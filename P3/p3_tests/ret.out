@@ -1,0 +1,6 @@
+
+*** Error line 4.
+  return 1.0;
+  ^^^^^^^^^^^
+*** Incompatible return: float given, int expected
+

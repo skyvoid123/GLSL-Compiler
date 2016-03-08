@@ -1,0 +1,12 @@
+
+*** Error line 7.
+     case a: break;
+          ^
+*** No declaration found for variable 'a'
+
+
+*** Error line 8.
+     case 1: x = 2.0; break;
+               ^
+*** Incompatible operands: int = float
+

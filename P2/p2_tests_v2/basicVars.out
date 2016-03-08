@@ -1,0 +1,11 @@
+
+   Program: 
+  1   VarDecl: 
+         Type: int
+  1      Identifier: x
+  2   VarDecl: 
+         Type: float
+  2      Identifier: y
+  3   VarDecl: 
+         Type: bool
+  3      Identifier: b

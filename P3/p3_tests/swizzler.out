@@ -1,0 +1,36 @@
+
+*** Error line 22.
+	v2.ax;		// bad
+           ^^
+*** VarExpr swizzle 'ax' is not proper subset of [xyzw]
+
+
+*** Error line 24.
+	v3.d;		// bad
+           ^
+*** VarExpr swizzle 'd' is not proper subset of [xyzw]
+
+
+*** Error line 25.
+	v3.kxk;		// bad
+           ^^^
+*** VarExpr swizzle 'kxk' is not proper subset of [xyzw]
+
+
+*** Error line 28.
+	v4.wwwd;	// bad
+           ^^^^
+*** VarExpr swizzle 'wwwd' is not proper subset of [xyzw]
+
+
+*** Error line 29.
+	v4.sax;		// bad
+           ^^^
+*** VarExpr swizzle 'sax' is not proper subset of [xyzw]
+
+
+*** Error line 30.
+	v4.xyzww;	// bad
+           ^^^^^
+*** VarExpr swizzle 'xyzww' generates a vector longer than vec4
+

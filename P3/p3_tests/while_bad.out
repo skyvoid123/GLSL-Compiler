@@ -1,0 +1,12 @@
+
+*** Error line 4.
+	while (i) {
+               ^
+*** Test expression must have boolean type
+
+
+*** Error line 5.
+		b = false;
+                ^
+*** No declaration found for variable 'b'
+

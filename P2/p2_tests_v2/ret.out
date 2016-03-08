@@ -1,0 +1,12 @@
+
+   Program: 
+  1   FnDecl: 
+         (return type) Type: void
+  1      Identifier: main
+         (body) StmtBlock: 
+  2         VarDecl: 
+               Type: int
+  2            Identifier: x
+  3         ReturnStmt: 
+  3            VarExpr: 
+  3               Identifier: x

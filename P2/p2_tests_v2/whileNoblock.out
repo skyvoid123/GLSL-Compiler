@@ -1,0 +1,17 @@
+
+   Program: 
+  1   FnDecl: 
+         (return type) Type: void
+  1      Identifier: foo
+         (body) StmtBlock: 
+  2         VarDecl: 
+               Type: bool
+  2            Identifier: b
+            WhileStmt: 
+  4            (test) VarExpr: 
+  4               Identifier: b
+  5            (body) AssignExpr: 
+  5               VarExpr: 
+  5                  Identifier: b
+  5               Operator: =
+  5               BoolConstant: false

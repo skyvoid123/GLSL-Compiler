@@ -1,0 +1,6 @@
+
+*** Error line 4.
+   return 1 != 2.0;
+                  ^
+*** Incompatible operands: int != float
+
