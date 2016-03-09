@@ -8,6 +8,7 @@
 #include <string.h> // strdup
 #include <stdio.h>  // printf
 
+Symtab* Node::S = NULL;
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
     parent = NULL;

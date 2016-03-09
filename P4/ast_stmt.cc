@@ -22,6 +22,10 @@ void Program::PrintChildren(int indentLevel) {
 }
 
 void Program::Emit() {
+    Print(0);
+    Node::S = new Symtab();
+    Node::S->enterScope();
+    Node::S->printTable();
     // TODO:
     // This is just a reference for you to get started
     //
@@ -38,7 +42,6 @@ void Program::Emit() {
     llvm::ArrayRef<llvm::Type *> argArray(argTypes);
     llvm::FunctionType *funcTy = llvm::FunctionType::get(intTy, argArray, false);
 
-    // llvm::Function *f = llvm::cast<llvm::Function>(mod->getOrInsertFunction("foo", intTy, intTy, (Type *)0));
     llvm::Function *f = llvm::cast<llvm::Function>(mod->getOrInsertFunction("foo", funcTy));
     llvm::Argument *arg = f->arg_begin();
     arg->setName("x");

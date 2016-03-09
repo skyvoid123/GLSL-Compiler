@@ -38,6 +38,7 @@
 
 #include <stdlib.h>   // for NULL
 #include "location.h"
+#include "symtab.h"
 
 class Node  {
   protected:
@@ -48,7 +49,7 @@ class Node  {
     Node(yyltype loc);
     Node();
     virtual ~Node() {}
-    
+    static Symtab* S;
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }
@@ -70,6 +71,7 @@ class Identifier : public Node
     
   public:
     Identifier(yyltype loc, const char *name);
+    const char *getName() { return name; }
     const char *GetPrintNameForNode()   { return "Identifier"; }
     void PrintChildren(int indentLevel);
 };

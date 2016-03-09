@@ -16,6 +16,7 @@
 
 #include "ast.h"
 #include "list.h"
+#include "ast_type.h"
 
 class Type;
 class NamedType;
@@ -32,6 +33,7 @@ class Decl : public Node
   public:
     Decl() : id(NULL) {}
     Decl(Identifier *name);
+    const char* getId() { return id->getName(); }
     Identifier *GetIdentifier() const { return id; }
 };
 
