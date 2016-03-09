@@ -24,8 +24,6 @@ void Program::PrintChildren(int indentLevel) {
 void Program::Emit() {
     Print(0);
     Node::S = new Symtab();
-    Node::S->enterScope();
-    Node::S->printTable();
     // TODO:
     // This is just a reference for you to get started
     //

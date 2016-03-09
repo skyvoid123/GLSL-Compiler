@@ -5,6 +5,10 @@
 #include <vector>
 #include <map>
 #include <string.h>
+#include "irgen.h"
+#define GLOBAL 1
+#define LOCAL 0
+#define INVALID -1
 using namespace std;
 
 class Decl;
@@ -12,8 +16,8 @@ class Type;
 
 typedef struct container {
     Decl* decl;
-    Type* type;
-    int valid;
+    llvm::Value* val;
+    int flag;
 } container;
 
 class Symtab {

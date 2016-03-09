@@ -20,7 +20,7 @@ bool Symtab::insert(pair<string, container> var) {
         cout << "No Scope" << endl;
         return false;
     }
-    if (find(var.first, levelNumber - 1).valid != -1) {
+    if (find(var.first, levelNumber - 1).flag != INVALID) {
         return false;
     }
     table->at(levelNumber - 1)->insert(var);
@@ -33,19 +33,17 @@ container Symtab::find(string var, int x) {
     it = currMap->find(var);
     if (it != currMap->end())
         return it->second;
-    container temp;
-    temp.valid = -1;
+    container temp = { NULL, NULL, INVALID };
     return temp;
 }
 
 container Symtab::find(string var) {
     for (int i = levelNumber - 1; i >= 0; i++) {
         container c = find(var, i);
-        if (c.valid != -1)
+        if (c.flag != INVALID)
             return c;
     }
-    container temp;
-    temp.valid = -1;
+    container temp = { NULL, NULL, INVALID };
     return temp;
 }
 
