@@ -35,7 +35,6 @@ llvm::Value* Program::Emit() {
     Node::S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
         Node::S->enterScope();
-        cout << i << endl;
         decls->Nth(i)->Emit();
         S->exitScope();
     }

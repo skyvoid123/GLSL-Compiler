@@ -39,6 +39,14 @@ void Type::PrintChildren(int indentLevel) {
 llvm::Type* Type::convert() {
     if (strcmp(typeName, "int") == 0)
         return Node::irgen->GetIntType();
+    else if (strcmp(typeName, "void") == 0)
+        return Node::irgen->GetVoidType();
+    else if (strcmp(typeName, "float") == 0)
+        return Node::irgen->GetFloatType();
+    else if (strcmp(typeName, "bool") == 0)
+        return Node::irgen->GetFloatType();
+    else
+        return NULL;
 }
 	
 NamedType::NamedType(Identifier *i) : Type(*i->GetLocation()) {

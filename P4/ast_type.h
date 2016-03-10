@@ -30,6 +30,7 @@ class Type : public Node
     Type(yyltype loc) : Node(loc) {}
     Type(const char *str);
     llvm::Type *convert();
+    const char *getName() { return typeName; }
     const char *GetPrintNameForNode() { return "Type"; }
     void PrintChildren(int indentLevel);
 };
