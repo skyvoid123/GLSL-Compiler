@@ -8,7 +8,8 @@
 #include <string.h> // strdup
 #include <stdio.h>  // printf
 
-Symtab* Node::S = NULL;
+Symtab* Node::S = new Symtab();
+IRGenerator* Node::irgen = new IRGenerator();
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
     parent = NULL;

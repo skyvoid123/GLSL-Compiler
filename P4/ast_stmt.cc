@@ -21,7 +21,7 @@ void Program::PrintChildren(int indentLevel) {
     printf("\n");
 }
 
-void Program::Emit() {
+llvm::Value* Program::Emit() {
     Print(0);
     Node::S = new Symtab();
     // TODO:
@@ -31,8 +31,18 @@ void Program::Emit() {
     // for individual node to fill in the module structure and instructions.
     //
     IRGenerator irgen;
-    llvm::Module *mod = irgen.GetOrCreateModule("foo.bc");
+    llvm::Module *mod = irgen.GetOrCreateModule("mod");
+    Node::S->enterScope();
+    for (int i = 0; i < decls->NumElements(); i++) {
+        Node::S->enterScope();
+        cout << i << endl;
+        decls->Nth(i)->Emit();
+        S->exitScope();
+    }
+    S->exitScope();
+    
 
+    /*
     // create a function signature
     std::vector<llvm::Type *> argTypes;
     llvm::Type *intTy = irgen.GetIntType();
@@ -55,6 +65,8 @@ void Program::Emit() {
 
     // write the BC into standard output
     llvm::WriteBitcodeToFile(mod, llvm::outs());
+    */
+    return NULL;
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {

@@ -50,6 +50,7 @@ class Node  {
     Node();
     virtual ~Node() {}
     static Symtab* S;
+    static IRGenerator* irgen;
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }
@@ -60,7 +61,7 @@ class Node  {
     // subclasses should override PrintChildren() instead
     void Print(int indentLevel, const char *label = NULL); 
     virtual void PrintChildren(int indentLevel)  {}
-    virtual void Emit() {}
+    virtual llvm::Value*  Emit() { return NULL;}
 };
    
 

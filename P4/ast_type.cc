@@ -36,6 +36,10 @@ void Type::PrintChildren(int indentLevel) {
     printf("%s", typeName);
 }
 
+llvm::Type* Type::convert() {
+    if (strcmp(typeName, "int") == 0)
+        return Node::irgen->GetIntType();
+}
 	
 NamedType::NamedType(Identifier *i) : Type(*i->GetLocation()) {
     Assert(i != NULL);
