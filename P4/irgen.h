@@ -36,6 +36,13 @@ class IRGenerator {
     llvm::Type *GetBoolType() const;
     llvm::Type *GetFloatType() const;
     llvm::Type *GetVoidType() const;
+    llvm::Type *GetVec2Type() const;
+    llvm::Type *GetVec3Type() const;
+    llvm::Type *GetVec4Type() const;
+    llvm::Type *GetMat2Type() const;
+    llvm::Type *GetMat3Type() const;
+    llvm::Type *GetMat4Type() const;
+    llvm::Type *GetErrorType() const;
 
   private:
     llvm::LLVMContext *context;
