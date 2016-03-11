@@ -648,6 +648,8 @@ llvm::Value* PostfixExpr::Emit() {
       llvm::StoreInst(result, addr, "",
                 irgen->IRGenerator::GetBasicBlock());
       return result;
+    } else if( strcmp(oper, ".") == 0 ) {
+      //Field Selection
     } else {
       //are there any other postfix ops?
     }
