@@ -91,7 +91,9 @@ llvm::Value* VarExpr::Emit() {
 llvm::Value* VarExpr::EmitAddress() {
   if( DEBUG ) {
     printf("VarExpr EmitAddress\n");
+    printf("%s\n",id->getName());
   }
+   
   llvm::Value* mem = S->find(id->getName()).val;
   return mem;
 }
@@ -305,11 +307,11 @@ llvm::Value* ArithmeticExpr::Emit() {
       if( lType->isFloatTy() && rType->isVectorTy() ) {
         //Lhs is float rhs is vec
         llvm::VectorType* vec = (llvm::VectorType*) rType;
-        VarExpr* rightV = dynamic_cast<VarExpr*>(right);
-        llvm::Value* addr = rightV->EmitAddress();
+        //VarExpr* rightV = dynamic_cast<VarExpr*>(right);
+        //llvm::Value* addr = rightV->EmitAddress();
         for( int i = 0; i < vec->getNumElements(); ++i ) {
-          llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
-		irgen->IRGenerator::GetBasicBlock());
+          //llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
+	//	irgen->IRGenerator::GetBasicBlock());
           llvm::Constant* vecId = 
 		llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), i);
           llvm::Value* val = llvm::ExtractElementInst::Create(rhs, vecId, "",
@@ -322,11 +324,11 @@ llvm::Value* ArithmeticExpr::Emit() {
       } else if( lType->isVectorTy() && rType->isFloatTy() ) {
         //Lhs is vec rhs is float
         llvm::VectorType* vec = (llvm::VectorType*) lType;
-        VarExpr* leftV = dynamic_cast<VarExpr*>(left);
-        llvm::Value* addr = leftV->EmitAddress();
+        //VarExpr* leftV = dynamic_cast<VarExpr*>(left);
+        //llvm::Value* addr = leftV->EmitAddress();
         for( int i = 0; i < vec->getNumElements(); ++i ) {
-          llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
-                irgen->IRGenerator::GetBasicBlock());
+          //llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
+          //      irgen->IRGenerator::GetBasicBlock());
           llvm::Constant* vecId =
                 llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), i);
           llvm::Value* val = llvm::ExtractElementInst::Create(lhs, vecId, "",
@@ -744,8 +746,40 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 llvm::Value* FieldAccess::Emit() {
   if( DEBUG ) {
     printf("FieldAccess\n");
-  } 
-  return NULL;
+  }
+  llvm::Value* lhs = base->Emit();
+  const char* swizC = field->getName();
+  std::vector<llvm::Constant*> indices;
+  int len = strlen(swizC);
+  for(int i = 0; i < len; ++i) {
+    char c = swizC[i];
+    if( c == 'x' ) {
+      //first element
+      llvm::Constant* vecId =
+		llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 0);
+      indices.push_back(vecId);
+    } else if( c == 'y' ) {
+      //second element
+      llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 1);
+      indices.push_back(vecId);
+    } else if( c == 'z' ) {
+      //third element    
+      llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 2);
+      indices.push_back(vecId);
+    } else {
+      //fourth element
+      llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 3);
+      indices.push_back(vecId);
+    }
+  }
+  llvm::ConstantVector* mask = 
+		(llvm::ConstantVector *)llvm::ConstantVector::get(indices);
+  llvm::Value* result = new llvm::ShuffleVectorInst(lhs, llvm::UndefValue::get(
+	lhs->getType()), mask, "", irgen->IRGenerator::GetBasicBlock());
+  return result;
 }
 
   void FieldAccess::PrintChildren(int indentLevel) {
