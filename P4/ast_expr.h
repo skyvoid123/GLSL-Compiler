@@ -23,8 +23,8 @@ class Expr : public Stmt
 {
   public:
     Expr(yyltype loc) : Stmt(loc) {}
-    llvm::Value* EmitAddress() { return EmitAddress(); }
     Expr() : Stmt() {}
+    llvm::Value* EmitAddress();
     llvm::Value* Emit();
 };
 

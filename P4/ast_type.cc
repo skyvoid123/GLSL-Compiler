@@ -44,7 +44,7 @@ llvm::Type* Type::convert() {
     else if (strcmp(typeName, "float") == 0)
         return Node::irgen->GetFloatType();
     else if (strcmp(typeName, "bool") == 0)
-        return Node::irgen->GetFloatType();
+        return Node::irgen->GetBoolType();
     else
         return NULL;
 }
