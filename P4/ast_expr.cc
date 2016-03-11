@@ -93,7 +93,6 @@ llvm::Value* VarExpr::Emit() {
 		irgen->IRGenerator::GetBasicBlock());
  
   return result;
-  
 }
 
 llvm::Value* VarExpr::EmitAddress() {
@@ -177,7 +176,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         llvm::Value* inc = llvm::ConstantFP::get(fConst, 1.0);
         llvm::Value* result = llvm::BinaryOperator::CreateFAdd(inc, rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "--") == 0 ) {
@@ -186,7 +185,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         llvm::Value* dec = llvm::ConstantFP::get(fConst, 1.0);
         llvm::Value* result = llvm::BinaryOperator::CreateFSub(dec, rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "+") == 0 ) {
@@ -196,7 +195,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         //Neg
         llvm::Value* result = llvm::BinaryOperator::CreateFNeg(rhs, "", 
 		irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else {
@@ -211,7 +210,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
         llvm::Value* result = llvm::BinaryOperator::CreateAdd(dec, rhs, "",
 		irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "--") == 0 ) {
@@ -220,7 +219,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
         llvm::Value* result = llvm::BinaryOperator::CreateSub(inc, rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "+") == 0 ) {
@@ -230,7 +229,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         //Neg
         llvm::Value* result = llvm::BinaryOperator::CreateNeg(rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       
@@ -264,14 +263,14 @@ llvm::Value* ArithmeticExpr::Emit() {
         //prefix inc
         llvm::Value* result = llvm::BinaryOperator::CreateFAdd(vect, rhs, "",
 		irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
 		irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "--") == 0 ) {
         //prefix dec
         llvm::Value* result = llvm::BinaryOperator::CreateFSub(vect, rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "",
+        new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
         return result;
       } else if( strcmp(oper, "+") == 0 ) {
@@ -281,7 +280,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         //negate
         llvm::Value* result = llvm::BinaryOperator::CreateFNeg(rhs, "",
 		irgen->IRGenerator::GetBasicBlock());
-        llvm::StoreInst(result, addr, "", 
+        new llvm::StoreInst(result, addr, 
 		irgen->IRGenerator::GetBasicBlock());
         return result;
       } else {
@@ -689,6 +688,7 @@ llvm::Value* PostfixExpr::Emit() {
     printf("Postfix\n");
   }
   llvm::Value* lhs = left->Emit();
+  cout << "ADADAD " << lhs->getType()->getTypeID() << endl;
   llvm::Value* addr;
   if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {
     addr = leftV->EmitAddress();
@@ -707,7 +707,7 @@ llvm::Value* PostfixExpr::Emit() {
       llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
       llvm::Value* result = llvm::BinaryOperator::CreateFAdd(lhs, inc, "",
                 irgen->IRGenerator::GetBasicBlock());
-      llvm::StoreInst(result, addr, "", 
+      new llvm::StoreInst(result, addr, 
 		irgen->IRGenerator::GetBasicBlock());
       return result;  
     } else if( strcmp(oper, "--") == 0 ) {
@@ -716,7 +716,7 @@ llvm::Value* PostfixExpr::Emit() {
       llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
       llvm::Value* result = llvm::BinaryOperator::CreateFSub(lhs, dec, "",
                 irgen->IRGenerator::GetBasicBlock());
-      llvm::StoreInst(result, addr, "",
+      new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( strcmp(oper, ".") == 0 ) {
@@ -732,7 +732,7 @@ llvm::Value* PostfixExpr::Emit() {
       llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
       llvm::Value* result = llvm::BinaryOperator::CreateAdd(lhs, inc, "",
                 irgen->IRGenerator::GetBasicBlock());
-      llvm::StoreInst(result, addr, "",
+      new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( strcmp(oper, "--") == 0 ) {
@@ -741,7 +741,7 @@ llvm::Value* PostfixExpr::Emit() {
       llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
       llvm::Value* result = llvm::BinaryOperator::CreateSub(lhs, dec, "",
                 irgen->IRGenerator::GetBasicBlock());
-      llvm::StoreInst(result, addr, "",
+      new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
       return result;
     } else {
