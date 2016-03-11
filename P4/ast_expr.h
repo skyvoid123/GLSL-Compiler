@@ -24,7 +24,7 @@ class Expr : public Stmt
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
-    llvm::Value* EmitAddress();
+    llvm::Value* EmitAddress() {return NULL; }
     llvm::Value* Emit();
 };
 
@@ -126,6 +126,8 @@ class ArithmeticExpr : public CompoundExpr
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { if(left != NULL) return left->EmitAddress();
+				else return right->EmitAddress(); }
     llvm::Value* comp(llvm::Value* lhs, llvm::Value* rhs, char* oper);
     llvm::Value* fcomp(llvm::Value* lhs, llvm::Value* rhs, char* oper);
     const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
@@ -136,6 +138,7 @@ class RelationalExpr : public CompoundExpr
   public:
     RelationalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { return left->EmitAddress(); }
     const char *GetPrintNameForNode() { return "RelationalExpr"; }
 };
 
@@ -144,6 +147,7 @@ class EqualityExpr : public CompoundExpr
   public:
     EqualityExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { return left->EmitAddress(); }
     const char *GetPrintNameForNode() { return "EqualityExpr"; }
 };
 
@@ -153,6 +157,7 @@ class LogicalExpr : public CompoundExpr
     LogicalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     LogicalExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { return left->EmitAddress(); }
     const char *GetPrintNameForNode() { return "LogicalExpr"; }
 };
 
@@ -161,6 +166,7 @@ class AssignExpr : public CompoundExpr
   public:
     AssignExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { return left->EmitAddress(); }
     const char *GetPrintNameForNode() { return "AssignExpr"; }
 };
 
@@ -169,6 +175,7 @@ class PostfixExpr : public CompoundExpr
   public:
     PostfixExpr(Expr *lhs, Operator *op) : CompoundExpr(lhs,op) {}
     llvm::Value* Emit();
+    llvm::Value* EmitAddress() { return left->EmitAddress(); }
     const char *GetPrintNameForNode() { return "PostfixExpr"; }
 };
 
@@ -203,7 +210,7 @@ class FieldAccess : public LValue
   public:
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
     llvm::Value* Emit();
-    llvm::Value* EmitAddress();
+    llvm::Value* EmitAddress() { return base->EmitAddress(); }
     const char *GetPrintNameForNode() { return "FieldAccess"; }
     void PrintChildren(int indentLevel);
 };

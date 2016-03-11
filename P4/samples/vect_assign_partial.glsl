@@ -7,8 +7,7 @@ float assignvec(float f)
 
    t = f + 0.5;
 
-   v4.xy = a;
-   v4.z = v4.w = t;
+   v4.x = a;
 
    return v4.x + v4.y + v4.z + v4.w;
 } 
