@@ -227,7 +227,7 @@ llvm::Value* IfStmt::Emit() {
     llvm::Function *f = Node::irgen->GetFunction();
     llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
     llvm::BasicBlock *tb = llvm::BasicBlock::Create(*context, "then", f);
-    llvm::BasicBlock *eb;
+    llvm::BasicBlock *eb = NULL;
     if (elseBody)
         eb = llvm::BasicBlock::Create(*context, "else", f);
     llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "if footer", f);
@@ -268,4 +268,5 @@ llvm::Value* ReturnStmt::Emit() {
     else {
         llvm::ReturnInst::Create(*context, bb);
     }
+    return NULL;
 }
