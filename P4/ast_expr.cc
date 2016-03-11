@@ -611,7 +611,6 @@ llvm::Value* AssignExpr::Emit() {
     //normal assign
     if( strlen(cSwiz) != 0 ) {
       //Is field assignment
-      if(DEBUG) printf("strlen%d\n",strlen(cSwiz));
       llvm::Value* baseAddr = new llvm::LoadInst(lhsAddr, "",
 		irgen->IRGenerator::GetBasicBlock());
       llvm::Constant* vecId;
