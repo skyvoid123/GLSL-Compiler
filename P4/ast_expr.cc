@@ -348,20 +348,20 @@ llvm::Value* RelationalExpr::Emit() {
     llvm::Value* result = llvm::CmpInst::Create(llvmOP, pred, lhs, rhs, "", 
 	irgen->IRGenerator::GetBasicBlock());
     return result;
-  } else if( rType-> isIntegerTy() ) {
+  } else if( rType->isIntegerTy() ) {
     //lhs is int
     llvm::CmpInst::OtherOps llvmOP = llvm::CmpInst::ICmp;
     llvm::CmpInst::Predicate pred;
-    if( strcmp(oper, ">") ) {
+    if( strcmp(oper, ">") == 0 ) {
       //Is less greater than operation
       pred = llvm::CmpInst::ICMP_SGT;
-    } else if( strcmp(oper, "<") ) {
+    } else if( strcmp(oper, "<") == 0 ) {
       //Is less than operation
       pred = llvm::CmpInst::ICMP_SLT;
-    } else if( strcmp(oper, ">=") ) {
+    } else if( strcmp(oper, ">=") == 0 ) {
       //Is greater than or equal operation
       pred = llvm::CmpInst::ICMP_SGE;
-    } else if( strcmp(oper, "<=") ) {
+    } else if( strcmp(oper, "<=") == 0 ) {
       //Is less than or equal operation
       pred = llvm::CmpInst::ICMP_SLE;
     } else {
@@ -378,15 +378,62 @@ llvm::Value* RelationalExpr::Emit() {
 llvm::Value* EqualityExpr::Emit() {
   llvm::Value* lhs = left->Emit();
   llvm::Value* rhs = right->Emit();
+  llvm::Type* lType = lhs->getType();
+  llvm::Type* rType = rhs->getType();
   char* oper = op->getOp();
-
+  if( lType->isFloatTy() || lType->isVectorTy() ) {
+    //lhs is float or vec2/3/4
+    llvm::CmpInst::OtherOps llvmOP = llvm::CmpInst::FCmp;
+    llvm::CmpInst::Predicate pred;
+    if( strcmp(oper, "==") == 0) {
+      //Is equal operation
+      pred = llvm::CmpInst::FCMP_OEQ;
+    } else if( strcmp(oper, "!=") == 0 ) {
+      //Is not equal operation
+      pred = llvm::CmpInst::FCMP_ONE;
+    } else {
+      //Get rid of warning
+      pred = llvm::CmpInst::FCMP_ONE;
+    }
+    llvm::Value* result = llvm::CmpInst::Create(llvmOP, pred, lhs, rhs, "",
+	irgen->IRGenerator::GetBasicBlock());
+    return result;
+  } else if( lType->isIntegerTy() ) {
+    //lhs is int or bool
+    llvm::CmpInst::OtherOps llvmOP = llvm::CmpInst::ICmp;
+    llvm::CmpInst::Predicate pred;
+    if( strcmp(oper, "==") == 0) {
+      //Is equal operation
+      pred = llvm::CmpInst::ICMP_EQ;
+    } else if( strcmp(oper, "!=") == 0 ) {
+      //Is not equal operation
+      pred = llvm::CmpInst::ICMP_NE;
+    } else {
+      //Get rid of warning
+      pred = llvm::CmpInst::ICMP_NE;
+    }
+    llvm::Value* result = llvm::CmpInst::Create(llvmOP, pred, lhs, rhs, "",
+        irgen->IRGenerator::GetBasicBlock());
+    return result;
+  }
+  //TODO: Can this have a void type?
   return NULL;
 }
 
 llvm::Value* LogicalExpr::Emit() {
   llvm::Value* lhs = left->Emit();
   llvm::Value* rhs = right->Emit();
+  llvm::Type* lType = lhs->getType();
+  llvm::Type* rType = rhs->getType();
   char* oper = op->getOp();
+  if( strcmp(oper, "||") == 0 ) {
+  
+  } else if( strcmp(oper, "&&") == 0 ) {
+  
+  } else {
+    //Get rid of warnings
+  
+  }
 
   return NULL;
 }
