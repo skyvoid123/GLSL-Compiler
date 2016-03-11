@@ -589,11 +589,12 @@ llvm::Value* AssignExpr::Emit() {
   }
   llvm::Value* lhsAddr;
   llvm::Value* lhs;
-  
+  const char* cSwiz = "";
   if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {;
     lhsAddr = leftV->EmitAddress();
   } else if( FieldAccess *f = dynamic_cast<FieldAccess*>(left)) {
     lhsAddr = f->EmitAddress();
+    cSwiz = f->getId()->getName();
   } else {
     if( DEBUG ) printf("assign expr not var or field\n");
     lhsAddr = right->Emit();
@@ -608,8 +609,66 @@ llvm::Value* AssignExpr::Emit() {
   char* oper = op->getOp();
   if( strcmp(oper, "=") == 0 ) {
     //normal assign
+    if( strlen(cSwiz) != 0 ) {
+      //Is field assignment
+      if(DEBUG) printf("strlen%d\n",strlen(cSwiz));
+      llvm::Value* baseAddr = new llvm::LoadInst(lhsAddr, "",
+		irgen->IRGenerator::GetBasicBlock());
+      llvm::Constant* vecId;
+      if( rType->isVectorTy() ) {
+        //Assigning vector to a vector
+        for( int i = 0; i < strlen(cSwiz); i++ ) {
+          char c = cSwiz[i];
+          if( c == 'x' ) {
+            vecId = llvm::ConstantInt::get(
+		irgen->IRGenerator::GetIntType(), 0);
+          } else if( c == 'y' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+          } else if( c == 'z' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+          } else {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+          }
+          llvm::Constant* extPos = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), i);
+          llvm::Value* ext = llvm::ExtractElementInst::Create(rhs, extPos, "",
+		irgen->IRGenerator::GetBasicBlock());
+          baseAddr = llvm::InsertElementInst::Create(baseAddr, ext, vecId, "",
+		irgen->IRGenerator::GetBasicBlock());
+        }
+      } else if( rType->isFloatTy() ) {
+        //Assigning float to a vector
+        for( int i = 0; i < strlen(cSwiz); i++ ) {
+          char c = cSwiz[i];
+          if( c == 'x' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 0);
+          } else if( c == 'y' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+          } else if( c == 'z' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+          } else {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+          }
+          baseAddr = llvm::InsertElementInst::Create(baseAddr, rhs, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+        }
+      }
+      llvm::Value* result = new llvm::StoreInst(baseAddr, lhsAddr, "",
+		irgen->IRGenerator::GetBasicBlock());
+      //TODO: check if works
+      return rhs;
+      //return result;
+    }
     llvm::Value* result = new llvm::StoreInst(rhs, lhsAddr,
 	irgen->IRGenerator::GetBasicBlock());
+    return rhs;
     return result;
   } else if( strcmp(oper, "+=") == 0 ) {
     //plus equals
@@ -858,17 +917,22 @@ llvm::Value* FieldAccess::Emit() {
     return result;
   }
 }
-/*
+
 llvm::Value* FieldAccess::EmitAddress() {
+  if( DEBUG ) {
+    printf("Field Access EmitAddress\n");
+  }
+  const char *c = field->getName();
   if( VarExpr* varE = dynamic_cast<VarExpr*>(base) ) {
     return varE->EmitAddress();
   } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(base) ) {
     return f->EmitAddress();
+  } else {
+    if( DEBUG ) printf("fieldaccess not var or field\n");
+    return base->EmitAddress();
   }
-  if( DEBUG ) printf("fieldaccess not var or field\n");
-  return NULL;
 }
-*/
+
   void FieldAccess::PrintChildren(int indentLevel) {
     if (base) base->Print(indentLevel+1);
     field->Print(indentLevel+1);
