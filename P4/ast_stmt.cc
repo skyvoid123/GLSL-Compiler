@@ -178,9 +178,14 @@ llvm::Value* ForStmt::Emit() {
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "for body", f);
     llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "for footer", f);
     llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , hb);
+    bb->moveAfter(hb);
     Node::irgen->SetBasicBlock(bb);
     body->Emit();
     //step->Emit();
+    fb->moveAfter(Node::irgen->GetBasicBlock());
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+    }
     if (!bb->getTerminator()) {
         llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context),  bb);
     }
@@ -199,8 +204,13 @@ llvm::Value* WhileStmt::Emit() {
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "while body", f);
     llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "while footer", f);
     llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , hb);
-    Node::irgen->SetBasicBlock(bb);
+    bb->moveAfter(hb);
+    Node::irgen->SetBasicBlock(bb);   
     body->Emit();
+    fb->moveAfter(Node::irgen->GetBasicBlock());
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+    }
     if (!bb->getTerminator()) {
         llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , bb);
     }
