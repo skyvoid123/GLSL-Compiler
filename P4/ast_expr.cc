@@ -81,11 +81,19 @@ llvm::Value* VarExpr::Emit() {
   if( DEBUG ) {
     printf("VarExpr\n");
   }
+  
+  container c = Node::S->find(id->getName());
+  if (c.flag == GLOBAL)
+      return new llvm::LoadInst(c.val, id->getName(), Node::irgen->GetBasicBlock());
+  else if (c.flag == LOCAL)
+      return c.val;
+  /* 
   llvm::Value* mem = S->find(id->getName()).val;
   llvm::Value* result = new llvm::LoadInst(mem, id->getName(), 
 		irgen->IRGenerator::GetBasicBlock());
  
   return result;
+  */
 }
 
 llvm::Value* VarExpr::EmitAddress() {
@@ -695,6 +703,7 @@ llvm::Value* PostfixExpr::Emit() {
     }
   } else if( lType->isIntegerTy() ) {
     if( strcmp(oper, "++") == 0 ) {
+      cout << "ASDASDASDASD" << endl;
       //Postfix inc
       llvm::Type* iConst = irgen->IRGenerator::GetIntType();
       llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);

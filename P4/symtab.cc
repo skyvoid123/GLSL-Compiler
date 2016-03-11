@@ -38,7 +38,7 @@ container Symtab::find(string var, int x) {
 }
 
 container Symtab::find(string var) {
-    for (int i = levelNumber - 1; i >= 0; i++) {
+    for (int i = levelNumber - 1; i >= 0; i--) {
         container c = find(var, i);
         if (c.flag != INVALID)
             return c;
