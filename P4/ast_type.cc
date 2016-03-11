@@ -45,6 +45,18 @@ llvm::Type* Type::convert() {
         return Node::irgen->GetFloatType();
     else if (strcmp(typeName, "bool") == 0)
         return Node::irgen->GetBoolType();
+    else if (strcmp(typeName, "vec2") == 0)
+        return Node::irgen->GetVec2Type();
+    else if (strcmp(typeName, "vec3") == 0)
+        return Node::irgen->GetVec3Type();
+    else if (strcmp(typeName, "vec4") == 0)
+        return Node::irgen->GetVec4Type();
+    else if (strcmp(typeName, "mat2") == 0)
+        return Node::irgen->GetMat2Type();
+    else if (strcmp(typeName, "mat3") == 0)
+        return Node::irgen->GetMat3Type();
+    else if (strcmp(typeName, "mat4") == 0)
+        return Node::irgen->GetMat4Type();
     else
         return NULL;
 }

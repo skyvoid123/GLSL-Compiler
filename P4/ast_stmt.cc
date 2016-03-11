@@ -154,6 +154,8 @@ llvm::Value* StmtBlock::Emit() {
     for (int i = 0; i < stmts->NumElements(); i++) {
         if (!Node::irgen->GetBasicBlock()->getTerminator())
             stmts->Nth(i)->Emit();
+        else if ( DEBUG )
+            cout << Node::irgen->GetBasicBlock()->getName().str() << endl;
     }
     return NULL;
 }
@@ -166,14 +168,15 @@ llvm::Value* DeclStmt::Emit() {
 }
 
 llvm::Value* ForStmt::Emit() {
+    Node::S->enterScope();
     if (DEBUG)
         cout << "ForStmt" << endl;
     llvm::LLVMContext *context = Node::irgen->GetContext();
     llvm::Function *f = Node::irgen->GetFunction();
     //init->Emit();
     llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
-    llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "body", f);
-    llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "footer", f);
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "for body", f);
+    llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "for footer", f);
     llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , hb);
     Node::irgen->SetBasicBlock(bb);
     body->Emit();
@@ -181,6 +184,27 @@ llvm::Value* ForStmt::Emit() {
     if (!bb->getTerminator()) {
         llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context),  bb);
     }
+    Node::irgen->SetBasicBlock(fb);
+    Node::S->exitScope();
     return NULL;
 }
 
+llvm::Value* WhileStmt::Emit() {
+    Node::S->enterScope();
+    if (DEBUG)
+        cout << "WhileStmt" << endl;
+    llvm::Function *f = Node::irgen->GetFunction();
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "while body", f);
+    llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "while footer", f);
+    llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , hb);
+    Node::irgen->SetBasicBlock(bb);
+    body->Emit();
+    if (!bb->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , bb);
+    }
+    Node::irgen->SetBasicBlock(fb);
+    Node::S->exitScope();
+    return NULL;
+}
