@@ -184,7 +184,7 @@ llvm::Value* ArithmeticExpr::Emit() {
         //Prefix decrement
         llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
         llvm::Value* dec = llvm::ConstantFP::get(fConst, 1.0);
-        llvm::Value* result = llvm::BinaryOperator::CreateFSub(dec, rhs, "",
+        llvm::Value* result = llvm::BinaryOperator::CreateFSub(rhs, dec, "",
                 irgen->IRGenerator::GetBasicBlock());
         new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
@@ -208,8 +208,8 @@ llvm::Value* ArithmeticExpr::Emit() {
       if( strcmp(oper, "++") == 0 ) {
         //Prefix increment
         llvm::Type* iConst = irgen->IRGenerator::GetIntType();
-        llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
-        llvm::Value* result = llvm::BinaryOperator::CreateAdd(dec, rhs, "",
+        llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
+        llvm::Value* result = llvm::BinaryOperator::CreateAdd(inc, rhs, "",
 		irgen->IRGenerator::GetBasicBlock());
         new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
@@ -217,8 +217,8 @@ llvm::Value* ArithmeticExpr::Emit() {
       } else if( strcmp(oper, "--") == 0 ) {
         //Prefix decrement
         llvm::Type* iConst = irgen->IRGenerator::GetIntType();
-        llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
-        llvm::Value* result = llvm::BinaryOperator::CreateSub(inc, rhs, "",
+        llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
+        llvm::Value* result = llvm::BinaryOperator::CreateSub(rhs, dec, "",
                 irgen->IRGenerator::GetBasicBlock());
         new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
@@ -775,22 +775,22 @@ llvm::Value* PostfixExpr::Emit() {
   if( lType->isFloatTy() || lType->isVectorTy() ) {
     if( strcmp(oper, "++") == 0 ) {
       //Postfix inc
-      llvm::Type* iConst = irgen->IRGenerator::GetIntType();
-      llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);
+      llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
+      llvm::Value* inc = llvm::ConstantFP::get(fConst, 1.0);
       llvm::Value* result = llvm::BinaryOperator::CreateFAdd(lhs, inc, "",
                 irgen->IRGenerator::GetBasicBlock());
       new llvm::StoreInst(result, addr, 
 		irgen->IRGenerator::GetBasicBlock());
-      return result;  
+      return lhs;  
     } else if( strcmp(oper, "--") == 0 ) {
       //Postfix dec
-      llvm::Type* iConst = irgen->IRGenerator::GetIntType();
-      llvm::Value* dec = llvm::ConstantInt::get(iConst, 1, true);
+      llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
+      llvm::Value* dec = llvm::ConstantFP::get(fConst, 1.0);
       llvm::Value* result = llvm::BinaryOperator::CreateFSub(lhs, dec, "",
                 irgen->IRGenerator::GetBasicBlock());
       new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
-      return result;
+      return lhs;
     } else if( strcmp(oper, ".") == 0 ) {
       //Field Selection??
     } else {
@@ -805,7 +805,7 @@ llvm::Value* PostfixExpr::Emit() {
                 irgen->IRGenerator::GetBasicBlock());
       new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
-      return result;
+      return lhs;
     } else if( strcmp(oper, "--") == 0 ) {
       //Postfix dec
       llvm::Type* iConst = irgen->IRGenerator::GetIntType();
@@ -814,7 +814,7 @@ llvm::Value* PostfixExpr::Emit() {
                 irgen->IRGenerator::GetBasicBlock());
       new llvm::StoreInst(result, addr,
                 irgen->IRGenerator::GetBasicBlock());
-      return result;
+      return lhs;
     } else {
       //are there any other postfix ops?
     }
