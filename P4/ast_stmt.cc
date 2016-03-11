@@ -238,6 +238,9 @@ llvm::Value* IfStmt::Emit() {
     if (!tb->getTerminator()) {
         llvm::BranchInst::Create(fb, tb);
     }
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(elseBody ? eb : fb, Node::irgen->GetBasicBlock());
+                }
     if (elseBody) {
         eb->moveAfter(Node::irgen->GetBasicBlock());
         Node::irgen->SetBasicBlock(eb);
@@ -245,6 +248,7 @@ llvm::Value* IfStmt::Emit() {
         if (!eb->getTerminator()) {
             llvm::BranchInst::Create(fb, eb);
         }
+        Node::irgen->SetBasicBlock(eb);
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
