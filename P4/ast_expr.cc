@@ -128,7 +128,6 @@ void CompoundExpr::PrintChildren(int indentLevel) {
 }
 
 llvm::Value* ArithmeticExpr::Emit() {
-  
   if( left == NULL ) {
     //Prefix expression
     llvm::Value* rhs = right->Emit();
