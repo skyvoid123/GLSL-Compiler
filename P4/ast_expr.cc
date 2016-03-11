@@ -441,16 +441,16 @@ llvm::Value* RelationalExpr::Emit() {
     //lhs is float
     llvm::CmpInst::OtherOps llvmOP = llvm::CmpInst::FCmp;
     llvm::CmpInst::Predicate pred;
-    if( strcmp(oper, ">") ) {
+    if( strcmp(oper, ">") == 0 ) {
       //Is less greater than operation
       pred = llvm::CmpInst::FCMP_OGT;
-    } else if( strcmp(oper, "<") ) {
+    } else if( strcmp(oper, "<") == 0 ) {
       //Is less than operation
       pred = llvm::CmpInst::FCMP_OLT;
-    } else if( strcmp(oper, ">=") ) {
+    } else if( strcmp(oper, ">=") == 0 ) {
       //Is greater than or equal operation
       pred = llvm::CmpInst::FCMP_OGE;
-    } else if( strcmp(oper, "<=") ) {
+    } else if( strcmp(oper, "<=") == 0 ) {
       //Is less than or equal operation
       pred = llvm::CmpInst::FCMP_OLE;
     } else {
@@ -676,17 +676,15 @@ llvm::Value* AssignExpr::Emit() {
     lType = lhs->getType();
     if( lType->isFloatTy() || lType->isVectorTy() ) {
       //lhs is float or vec2/3/4
-      llvm::Value* add = llvm::BinaryOperator::CreateFAdd(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateFAdd(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( lType->isIntegerTy() ) {
       //lhs is integer
-      llvm::Value* add = llvm::BinaryOperator::CreateAdd(lhs, rhs, "", 
+      llvm::Value* result = llvm::BinaryOperator::CreateAdd(lhs, rhs, "", 
 	irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-	irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     }
   } else if( strcmp(oper, "-=") == 0 ) {
@@ -695,17 +693,15 @@ llvm::Value* AssignExpr::Emit() {
     lType = lhs->getType();
     if( lType->isFloatTy() || lType->isVectorTy() ) {
       //lhs is float or vec2/3/4
-      llvm::Value* add = llvm::BinaryOperator::CreateFSub(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateFSub(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( lType->isIntegerTy() ) {
       //lhs is integer
-      llvm::Value* add = llvm::BinaryOperator::CreateSub(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateSub(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     }
   } else if( strcmp(oper, "*=") == 0 ) {
@@ -714,17 +710,15 @@ llvm::Value* AssignExpr::Emit() {
     lType = lhs->getType();
     if( lType->isFloatTy() || lType->isVectorTy() ) {
       //lhs is float or vec2/3/4
-      llvm::Value* add = llvm::BinaryOperator::CreateFMul(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateFMul(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( lType->isIntegerTy() ) {
       //lhs is integer
-      llvm::Value* add = llvm::BinaryOperator::CreateMul(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateMul(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     }
   } else if( strcmp(oper, "/=") == 0 ) {
@@ -733,17 +727,15 @@ llvm::Value* AssignExpr::Emit() {
     lType = lhs->getType();
     if( lType->isFloatTy() || lType->isVectorTy() ) {
       //lhs is float or vec2/3/4
-      llvm::Value* add = llvm::BinaryOperator::CreateFDiv(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateFDiv(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;   
     } else if( lType->isIntegerTy() ) {
       //lhs is integer
-      llvm::Value* add = llvm::BinaryOperator::CreateSDiv(lhs, rhs, "",
+      llvm::Value* result = llvm::BinaryOperator::CreateSDiv(lhs, rhs, "",
         irgen->IRGenerator::GetBasicBlock());
-      llvm::Value* result = new llvm::StoreInst(add, lhsAddr,
-        irgen->IRGenerator::GetBasicBlock());
+      new llvm::StoreInst(result, lhsAddr, irgen->IRGenerator::GetBasicBlock());
       return result;
     }
   } else {
