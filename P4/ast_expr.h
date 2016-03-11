@@ -23,6 +23,7 @@ class Expr : public Stmt
 {
   public:
     Expr(yyltype loc) : Stmt(loc) {}
+    llvm::Value* EmitAddress() { return EmitAddress(); }
     Expr() : Stmt() {}
     llvm::Value* Emit();
 };
@@ -89,6 +90,7 @@ class VarExpr : public Expr
   public:
     VarExpr(yyltype loc, Identifier *id);
     llvm::Value* Emit();
+    llvm::Value* EmitAddress();
     const char *GetPrintNameForNode() { return "VarExpr"; }
     void PrintChildren(int indentLevel);
 };
@@ -200,6 +202,7 @@ class FieldAccess : public LValue
     
   public:
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "FieldAccess"; }
     void PrintChildren(int indentLevel);
 };
