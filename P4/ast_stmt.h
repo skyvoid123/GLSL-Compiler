@@ -131,6 +131,7 @@ class BreakStmt : public Stmt
 {
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
+    llvm::Value * Emit();
     const char *GetPrintNameForNode() { return "BreakStmt"; }
 };
 
@@ -138,6 +139,7 @@ class ContinueStmt : public Stmt
 {
   public:
     ContinueStmt(yyltype loc) : Stmt(loc) {}
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "ContinueStmt"; }
 };
 

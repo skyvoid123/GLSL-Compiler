@@ -173,17 +173,27 @@ llvm::Value* ForStmt::Emit() {
         cout << "ForStmt" << endl;
     llvm::LLVMContext *context = Node::irgen->GetContext();
     llvm::Function *f = Node::irgen->GetFunction();
+    llvm::BasicBlock *pbb = Node::breakB;
+    llvm::BasicBlock *pcb = Node::continueB;
     init->Emit();
     llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "for body", f);
     llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "for footer", f);
+    llvm::BasicBlock *sb = llvm::BasicBlock::Create(*context, "for step", f);
     llvm::BranchInst::Create(bb, fb, test->Emit(), hb);
-    bb->moveAfter(hb);
+    Node::breakB = fb;
+    Node::continueB = sb;
+    bb->moveAfter(Node::irgen->GetBasicBlock());
     Node::irgen->SetBasicBlock(bb);
     body->Emit();
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(sb, Node::irgen->GetBasicBlock());
+    }
+    sb->moveAfter(Node::irgen->GetBasicBlock());
+    Node::irgen->SetBasicBlock(sb);
     step->Emit();
-    if (!bb->getTerminator()) {
-        llvm::BranchInst::Create(bb, fb, test->Emit(),  bb);
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, test->Emit(), Node::irgen->GetBasicBlock());
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
@@ -191,6 +201,8 @@ llvm::Value* ForStmt::Emit() {
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
+    Node::breakB = pbb;
+    Node::continueB = pcb;
     return NULL;
 }
 
@@ -198,17 +210,29 @@ llvm::Value* WhileStmt::Emit() {
     Node::S->enterScope();
     if (DEBUG)
         cout << "WhileStmt" << endl;
+    llvm::BasicBlock *pbb = Node::breakB;
+    llvm::BasicBlock *pcb = Node::continueB;
     llvm::Function *f = Node::irgen->GetFunction();
     llvm::LLVMContext *context = Node::irgen->GetContext();
     llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *tb = llvm::BasicBlock::Create(*context, "while test", f);
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "while body", f);
     llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "while footer", f);
-    llvm::BranchInst::Create(bb, fb, test->Emit(), hb);
-    bb->moveAfter(hb);
+    Node::breakB = fb;
+    Node::continueB = tb;
+    if (!hb->getTerminator()) {
+        llvm::BranchInst::Create(tb, hb);
+    }
+    tb->moveAfter(Node::irgen->GetBasicBlock());
+    Node::irgen->SetBasicBlock(tb);
+    if (!tb->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, test->Emit(), tb);
+    }
+    bb->moveAfter(tb);
     Node::irgen->SetBasicBlock(bb);   
     body->Emit();
     if (!bb->getTerminator()) {
-        llvm::BranchInst::Create(bb, fb, test->Emit(), bb);
+        llvm::BranchInst::Create(tb, bb);
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
@@ -216,6 +240,8 @@ llvm::Value* WhileStmt::Emit() {
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
+    Node::breakB = pbb;
+    Node::continueB = pcb;
     return NULL;
 }
 
@@ -259,7 +285,27 @@ llvm::Value* IfStmt::Emit() {
     return NULL;
 }
 
+llvm::Value* BreakStmt::Emit() {
+    if (DEBUG)
+        cout << "BreakStmt" << endl;
+    llvm::BasicBlock *bb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *suc = Node::breakB;
+    llvm::BranchInst::Create(suc, bb);
+    return NULL;
+}
+
+llvm::Value* ContinueStmt::Emit() {
+    if (DEBUG)
+        cout << "ContinueStmt" << endl;
+    llvm::BasicBlock *bb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *suc = Node::continueB;
+    llvm::BranchInst::Create(suc, bb);
+    return NULL;
+}
+
 llvm::Value* ReturnStmt::Emit() {
+    if (DEBUG)
+        cout << "ReturnStmt" << endl;
     llvm::LLVMContext* context = Node::irgen->GetContext();
     llvm::BasicBlock *bb = Node::irgen->GetBasicBlock();
     if (expr) {
