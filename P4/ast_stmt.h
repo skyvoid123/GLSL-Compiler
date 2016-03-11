@@ -32,7 +32,7 @@ class Program : public Node
      Program(List<Decl*> *declList);
      const char *GetPrintNameForNode() { return "Program"; }
      void PrintChildren(int indentLevel);
-     virtual llvm::Value* Emit();
+     llvm::Value* Emit();
 };
 
 class Stmt : public Node
@@ -40,6 +40,7 @@ class Stmt : public Node
   public:
      Stmt() : Node() {}
      Stmt(yyltype loc) : Node(loc) {}
+     llvm::Value* Emit() { if (DEBUG) { cout <<"Stmt" <<endl; } return NULL; }
 };
 
 class StmtBlock : public Stmt 
@@ -50,6 +51,7 @@ class StmtBlock : public Stmt
     
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "StmtBlock"; }
     void PrintChildren(int indentLevel);
 };

@@ -22,7 +22,8 @@ void Program::PrintChildren(int indentLevel) {
 }
 
 llvm::Value* Program::Emit() {
-    Print(0);
+    if (DEBUG) 
+        Print(0);
     Node::S = new Symtab();
     // TODO:
     // This is just a reference for you to get started
@@ -30,13 +31,10 @@ llvm::Value* Program::Emit() {
     // You can use this as a template and create Emit() function
     // for individual node to fill in the module structure and instructions.
     //
-    IRGenerator irgen;
-    llvm::Module *mod = irgen.GetOrCreateModule("mod");
+    llvm::Module *mod = Node::irgen->GetOrCreateModule("mod");
     Node::S->enterScope();
     for (int i = 0; i < decls->NumElements(); i++) {
-        Node::S->enterScope();
         decls->Nth(i)->Emit();
-        S->exitScope();
     }
     S->exitScope();
     
@@ -63,8 +61,8 @@ llvm::Value* Program::Emit() {
     llvm::ReturnInst::Create(*context, sum, bb);
 
     // write the BC into standard output
-    llvm::WriteBitcodeToFile(mod, llvm::outs());
     */
+    llvm::WriteBitcodeToFile(mod, llvm::outs());
     return NULL;
 }
 
@@ -169,3 +167,11 @@ void SwitchStmt::PrintChildren(int indentLevel) {
     if (def) def->Print(indentLevel+1);
 }
 
+llvm::Value* StmtBlock::Emit() {
+    if (DEBUG)
+        cout << "StmtBlock" << endl;
+    for (int i = 0; i < stmts->NumElements(); i++) {
+        stmts->Nth(i)->Emit();
+    }
+    return NULL;
+}
