@@ -63,6 +63,7 @@ class DeclStmt: public Stmt
     
   public:
     DeclStmt(Decl *d);
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "DeclStmt"; }
     void PrintChildren(int indentLevel);
 };
@@ -92,6 +93,7 @@ class ForStmt : public LoopStmt
   
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "ForStmt"; }
     void PrintChildren(int indentLevel);
 };

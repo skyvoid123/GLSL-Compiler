@@ -22,6 +22,8 @@ llvm::Value* Decl::Emit() {
 }
 
 llvm::Value* VarDecl::Emit() {
+    if (DEBUG)
+        cout << "VarDecl" << endl;
     llvm::Module *mod = irgen->GetOrCreateModule("mod");
     const llvm::Twine tw(getId());
     llvm::Type* t = getType()->convert();
@@ -50,6 +52,8 @@ llvm::Value* VarDecl::Emit() {
 }
 
 llvm::Value* FnDecl::Emit() {
+    if (DEBUG)
+        cout << "FnDecl" << endl;
     Node::S->enterScope();
     llvm::Module *mod = Node::irgen->GetOrCreateModule("mod");
     string name = getId();
@@ -61,6 +65,7 @@ llvm::Value* FnDecl::Emit() {
     llvm::ArrayRef<llvm::Type *> argArray(argTypes);
     llvm::FunctionType *funcTy = llvm::FunctionType::get(retType, argArray, false);
     llvm::Function *f = llvm::cast<llvm::Function>(mod->getOrInsertFunction(name, funcTy));
+    Node::irgen->SetFunction(f);
     llvm::LLVMContext *context = Node::irgen->GetContext();
     llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, name, f);
     Node::irgen->SetBasicBlock(bb);

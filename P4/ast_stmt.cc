@@ -37,32 +37,10 @@ llvm::Value* Program::Emit() {
         decls->Nth(i)->Emit();
     }
     S->exitScope();
-    
-
-    /*
-    // create a function signature
-    std::vector<llvm::Type *> argTypes;
-    llvm::Type *intTy = irgen.GetIntType();
-    argTypes.push_back(intTy);
-    llvm::ArrayRef<llvm::Type *> argArray(argTypes);
-    llvm::FunctionType *funcTy = llvm::FunctionType::get(intTy, argArray, false);
-
-    llvm::Function *f = llvm::cast<llvm::Function>(mod->getOrInsertFunction("foo", funcTy));
-    llvm::Argument *arg = f->arg_begin();
-    arg->setName("x");
-
-    // insert a block into the runction
-    llvm::LLVMContext *context = irgen.GetContext();
-    llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "entry", f);
-
-    // create a return instruction
-    llvm::Value *val = llvm::ConstantInt::get(intTy, 1);
-    llvm::Value *sum = llvm::BinaryOperator::CreateAdd(arg, val, "", bb);
-    llvm::ReturnInst::Create(*context, sum, bb);
-
-    // write the BC into standard output
-    */
-    llvm::WriteBitcodeToFile(mod, llvm::outs());
+    if (DEBUG)
+        mod->dump();
+    else
+        llvm::WriteBitcodeToFile(mod, llvm::outs());
     return NULL;
 }
 
@@ -170,8 +148,39 @@ void SwitchStmt::PrintChildren(int indentLevel) {
 llvm::Value* StmtBlock::Emit() {
     if (DEBUG)
         cout << "StmtBlock" << endl;
+    for (int i = 0; i < decls->NumElements(); i++) {
+        decls->Nth(i)->Emit();
+    }
     for (int i = 0; i < stmts->NumElements(); i++) {
-        stmts->Nth(i)->Emit();
+        if (!Node::irgen->GetBasicBlock()->getTerminator())
+            stmts->Nth(i)->Emit();
     }
     return NULL;
 }
+
+llvm::Value* DeclStmt::Emit() {
+    if (DEBUG)
+        cout << "DeclStmt" << endl;
+    decl->Emit();
+    return NULL;
+}
+
+llvm::Value* ForStmt::Emit() {
+    if (DEBUG)
+        cout << "ForStmt" << endl;
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::Function *f = Node::irgen->GetFunction();
+    //init->Emit();
+    llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *bb = llvm::BasicBlock::Create(*context, "body", f);
+    llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "footer", f);
+    llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context) , hb);
+    Node::irgen->SetBasicBlock(bb);
+    body->Emit();
+    //step->Emit();
+    if (!bb->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, llvm::ConstantInt::getTrue(*context),  bb);
+    }
+    return NULL;
+}
+
