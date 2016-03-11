@@ -99,7 +99,6 @@ llvm::Value* VarExpr::Emit() {
 llvm::Value* VarExpr::EmitAddress() {
   if( DEBUG ) {
     printf("VarExpr EmitAddress\n");
-    printf("%s\n",id->getName());
   }
    
   llvm::Value* mem = S->find(id->getName()).val;
@@ -159,8 +158,15 @@ llvm::Value* ArithmeticExpr::Emit() {
       printf("Prefix\n");
     }
     llvm::Value* rhs = right->Emit();
-    VarExpr* rightV = dynamic_cast<VarExpr*>(right);
-    llvm::Value* addr = rightV->EmitAddress();
+    llvm::Value* addr;
+    if( VarExpr* rightV = dynamic_cast<VarExpr*>(right) ) {
+      addr = rightV->EmitAddress();
+    } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(right) ) {
+      addr = f->EmitAddress();
+    } else {
+      if( DEBUG ) printf("prefix not var or field\n");
+      addr = right->Emit();
+    }
     llvm::Type* rType = rhs->getType();
     char* oper = op->getOp();
     if( rType->isFloatTy() ) {
@@ -581,8 +587,15 @@ llvm::Value* AssignExpr::Emit() {
   if( DEBUG ) {
     printf("Assign\n");
   }
-  VarExpr* leftV = dynamic_cast<VarExpr*>(left);
-  llvm::Value* lhs =  leftV->EmitAddress();
+  llvm::Value* lhs;
+  if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {;
+    lhs = leftV->EmitAddress();
+  } else if( FieldAccess *f = dynamic_cast<FieldAccess*>(left)) {
+    lhs = f->EmitAddress();
+  } else {
+    if( DEBUG ) printf("assign expr not var or field\n");
+    lhs = right->Emit();
+  }
   llvm::Value* rhs = right->Emit();
   llvm::Type* lType = lhs->getType();
   llvm::Type* rType = rhs->getType();
@@ -673,8 +686,15 @@ llvm::Value* PostfixExpr::Emit() {
     printf("Postfix\n");
   }
   llvm::Value* lhs = left->Emit();
-  VarExpr* leftV = dynamic_cast<VarExpr*>(left);
-  llvm::Value* addr = leftV->EmitAddress();
+  llvm::Value* addr;
+  if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {
+    addr = leftV->EmitAddress();
+  } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(left) ) {
+    addr = f->EmitAddress();
+  } else {
+    if( DEBUG ) printf("postfix address not var or field\n");
+    addr = left->Emit();
+  }
   llvm::Type* lType = lhs->getType();
   char* oper = op->getOp();
   if( lType->isFloatTy() || lType->isVectorTy() ) {
@@ -789,6 +809,16 @@ llvm::Value* FieldAccess::Emit() {
   llvm::Value* result = new llvm::ShuffleVectorInst(lhs, llvm::UndefValue::get(
 	lhs->getType()), mask, "", irgen->IRGenerator::GetBasicBlock());
   return result;
+}
+
+llvm::Value* FieldAccess::EmitAddress() {
+  if( VarExpr* varE = dynamic_cast<VarExpr*>(base) ) {
+    return varE->EmitAddress();
+  } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(base) ) {
+    return f->EmitAddress();
+  }
+  if( DEBUG ) printf("fieldaccess not var or field\n");
+  return NULL;
 }
 
   void FieldAccess::PrintChildren(int indentLevel) {
