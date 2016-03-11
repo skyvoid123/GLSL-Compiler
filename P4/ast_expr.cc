@@ -23,8 +23,11 @@ llvm::Value* EmptyExpr::Emit() {
 }
 
 llvm::Value* IntConstant::Emit() {
+  if( DEBUG ) {
+    printf("Int\n");
+  }
   llvm::Type* iConst = irgen->IRGenerator::GetIntType();
-  llvm::Value* result = llvm::ConstantFP::get(iConst, value);
+  llvm::Value* result = llvm::ConstantInt::get(iConst, value);
   return result;
 }
 
@@ -37,6 +40,9 @@ void IntConstant::PrintChildren(int indentLevel) {
 }
 
 llvm::Value* FloatConstant::Emit() {
+  if( DEBUG ) {
+    printf("Float\n");
+  }
   llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
   llvm::Value* result = llvm::ConstantFP::get(fConst, value);
   return result;
@@ -51,6 +57,9 @@ void FloatConstant::PrintChildren(int indentLevel) {
 }
 
 llvm::Value* BoolConstant::Emit() {
+  if( DEBUG ) {
+    printf("Bool\n");
+  }
   llvm::Type* bConst = irgen->IRGenerator::GetBoolType();
   llvm::Value* result = llvm::ConstantInt::get(bConst, value);
   return result;
@@ -69,6 +78,9 @@ VarExpr::VarExpr(yyltype loc, Identifier *ident) : Expr(loc) {
 }
 
 llvm::Value* VarExpr::Emit() {
+  if( DEBUG ) {
+    printf("VarExpr\n");
+  }
   llvm::Value* mem = S->find(id->getName()).val;
   llvm::Value* result = new llvm::LoadInst(mem, id->getName(), 
 		irgen->IRGenerator::GetBasicBlock());
@@ -77,6 +89,9 @@ llvm::Value* VarExpr::Emit() {
 }
 
 llvm::Value* VarExpr::EmitAddress() {
+  if( DEBUG ) {
+    printf("VarExpr EmitAddress\n");
+  }
   llvm::Value* mem = S->find(id->getName()).val;
   return mem;
 }
@@ -130,8 +145,12 @@ void CompoundExpr::PrintChildren(int indentLevel) {
 llvm::Value* ArithmeticExpr::Emit() {
   if( left == NULL ) {
     //Prefix expression
+    if( DEBUG ) {
+      printf("Prefix\n");
+    }
     llvm::Value* rhs = right->Emit();
-    llvm::Value* addr = right->EmitAddress();
+    VarExpr* rightV = dynamic_cast<VarExpr*>(right);
+    llvm::Value* addr = rightV->EmitAddress();
     llvm::Type* rType = rhs->getType();
     char* oper = op->getOp();
     if( rType->isFloatTy() ) {
@@ -257,6 +276,9 @@ llvm::Value* ArithmeticExpr::Emit() {
     }
   } else {
     //is a normal ArithmeticExpr
+    if( DEBUG ) {
+      printf("Arithmetic");
+    }
     llvm::Value* lhs = left->Emit();
     llvm::Value* rhs = right->Emit();
     llvm::Type* lType = lhs->getType();
@@ -283,7 +305,8 @@ llvm::Value* ArithmeticExpr::Emit() {
       if( lType->isFloatTy() && rType->isVectorTy() ) {
         //Lhs is float rhs is vec
         llvm::VectorType* vec = (llvm::VectorType*) rType;
-        llvm::Value* addr = right->EmitAddress();
+        VarExpr* rightV = dynamic_cast<VarExpr*>(right);
+        llvm::Value* addr = rightV->EmitAddress();
         for( int i = 0; i < vec->getNumElements(); ++i ) {
           llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
 		irgen->IRGenerator::GetBasicBlock());
@@ -299,7 +322,8 @@ llvm::Value* ArithmeticExpr::Emit() {
       } else if( lType->isVectorTy() && rType->isFloatTy() ) {
         //Lhs is vec rhs is float
         llvm::VectorType* vec = (llvm::VectorType*) lType;
-        llvm::Value* addr = left->EmitAddress();
+        VarExpr* leftV = dynamic_cast<VarExpr*>(left);
+        llvm::Value* addr = leftV->EmitAddress();
         for( int i = 0; i < vec->getNumElements(); ++i ) {
           llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
                 irgen->IRGenerator::GetBasicBlock());
@@ -389,6 +413,9 @@ llvm::Value* ArithmeticExpr::fcomp(llvm::Value* lhs,
 }
 
 llvm::Value* RelationalExpr::Emit() {
+  if( DEBUG ) {
+    printf("Relational\n");
+  }
   llvm::Value* lhs = left->Emit();
   llvm::Value* rhs = right->Emit();
   llvm::Type* lType = lhs->getType();
@@ -445,6 +472,9 @@ llvm::Value* RelationalExpr::Emit() {
 }
 
 llvm::Value* EqualityExpr::Emit() {
+  if( DEBUG ) {
+    printf("Equality\n");
+  }
   llvm::Value* lhs = left->Emit();
   llvm::Value* rhs = right->Emit();
   llvm::Type* lType = lhs->getType();
@@ -538,7 +568,11 @@ llvm::Value* LogicalExpr::Emit() {
 }
 
 llvm::Value* AssignExpr::Emit() {
-  llvm::Value* lhs = left->EmitAddress();
+  if( DEBUG ) {
+    printf("Assign\n");
+  }
+  VarExpr* leftV = dynamic_cast<VarExpr*>(left);
+  llvm::Value* lhs =  leftV->EmitAddress();
   llvm::Value* rhs = right->Emit();
   llvm::Type* lType = lhs->getType();
   llvm::Type* rType = rhs->getType();
@@ -625,8 +659,12 @@ llvm::Value* AssignExpr::Emit() {
 }
 
 llvm::Value* PostfixExpr::Emit() {
+  if( DEBUG ) {
+    printf("Postfix\n");
+  }
   llvm::Value* lhs = left->Emit();
-  llvm::Value* addr = left->EmitAddress();
+  VarExpr* leftV = dynamic_cast<VarExpr*>(left);
+  llvm::Value* addr = leftV->EmitAddress();
   llvm::Type* lType = lhs->getType();
   char* oper = op->getOp();
   if( lType->isFloatTy() || lType->isVectorTy() ) {
@@ -649,7 +687,7 @@ llvm::Value* PostfixExpr::Emit() {
                 irgen->IRGenerator::GetBasicBlock());
       return result;
     } else if( strcmp(oper, ".") == 0 ) {
-      //Field Selection
+      //Field Selection??
     } else {
       //are there any other postfix ops?
     }
@@ -704,7 +742,9 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 }
 
 llvm::Value* FieldAccess::Emit() {
-
+  if( DEBUG ) {
+    printf("FieldAccess\n");
+  } 
   return NULL;
 }
 
@@ -725,5 +765,5 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     if (base) base->Print(indentLevel+1);
     if (field) field->Print(indentLevel+1);
     if (actuals) actuals->PrintAll(indentLevel+1, "(actuals) ");
-  }
+ }
  
