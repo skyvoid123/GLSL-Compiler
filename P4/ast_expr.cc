@@ -81,19 +81,19 @@ llvm::Value* VarExpr::Emit() {
   if( DEBUG ) {
     printf("VarExpr\n");
   }
-  
+  /*
   container c = Node::S->find(id->getName());
   if (c.flag == GLOBAL)
       return new llvm::LoadInst(c.val, id->getName(), Node::irgen->GetBasicBlock());
   else if (c.flag == LOCAL)
       return c.val;
-  /* 
+  */
   llvm::Value* mem = S->find(id->getName()).val;
   llvm::Value* result = new llvm::LoadInst(mem, id->getName(), 
 		irgen->IRGenerator::GetBasicBlock());
  
   return result;
-  */
+  
 }
 
 llvm::Value* VarExpr::EmitAddress() {
@@ -597,6 +597,9 @@ llvm::Value* AssignExpr::Emit() {
     lhs = right->Emit();
   }
   llvm::Value* rhs = right->Emit();
+  if( llvm::StoreInst* si = dynamic_cast<llvm::StoreInst*>(rhs) ) {
+    rhs = si->getValueOperand();
+  }
   llvm::Type* lType = lhs->getType();
   llvm::Type* rType = rhs->getType();
   char* oper = op->getOp();
