@@ -685,7 +685,6 @@ llvm::Value* PostfixExpr::Emit() {
     printf("Postfix\n");
   }
   llvm::Value* lhs = left->Emit();
-  cout << "ADADAD " << lhs->getType()->getTypeID() << endl;
   llvm::Value* addr;
   if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {
     addr = leftV->EmitAddress();
@@ -723,7 +722,6 @@ llvm::Value* PostfixExpr::Emit() {
     }
   } else if( lType->isIntegerTy() ) {
     if( strcmp(oper, "++") == 0 ) {
-      cout << "ASDASDASDASD" << endl;
       //Postfix inc
       llvm::Type* iConst = irgen->IRGenerator::GetIntType();
       llvm::Value* inc = llvm::ConstantInt::get(iConst, 1, true);

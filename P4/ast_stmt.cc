@@ -218,3 +218,14 @@ llvm::Value* WhileStmt::Emit() {
     Node::S->exitScope();
     return NULL;
 }
+
+llvm::Value* ReturnStmt::Emit() {
+    llvm::LLVMContext* context = Node::irgen->GetContext();
+    llvm::BasicBlock *bb = Node::irgen->GetBasicBlock();
+    if (expr) {
+        llvm::ReturnInst::Create(*context, expr->Emit(), bb);
+    }
+    else {
+        llvm::ReturnInst::Create(*context, bb);
+    }
+}

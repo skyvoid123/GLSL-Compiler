@@ -147,6 +147,7 @@ class ReturnStmt : public Stmt
   
   public:
     ReturnStmt(yyltype loc, Expr *expr = NULL);
+    llvm::Value* Emit(); 
     const char *GetPrintNameForNode() { return "ReturnStmt"; }
     void PrintChildren(int indentLevel);
 };
