@@ -781,35 +781,68 @@ llvm::Value* FieldAccess::Emit() {
   const char* swizC = field->getName();
   std::vector<llvm::Constant*> indices;
   int len = strlen(swizC);
-  for(int i = 0; i < len; ++i) {
-    char c = swizC[i];
+  if( len == 1 ) {
+    char c = swizC[0];
     if( c == 'x' ) {
       //first element
       llvm::Constant* vecId =
 		llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 0);
-      indices.push_back(vecId);
+      llvm::Value* result = llvm::ExtractElementInst::Create(lhs, vecId, "",
+		irgen->IRGenerator::GetBasicBlock());
+      return result;
     } else if( c == 'y' ) {
       //second element
       llvm::Constant* vecId =
                 llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 1);
-      indices.push_back(vecId);
+      llvm::Value* result = llvm::ExtractElementInst::Create(lhs, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+      return result;
     } else if( c == 'z' ) {
-      //third element    
+      //third element
       llvm::Constant* vecId =
                 llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 2);
-      indices.push_back(vecId);
+      llvm::Value* result = llvm::ExtractElementInst::Create(lhs, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+      return result;
     } else {
       //fourth element
       llvm::Constant* vecId =
                 llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 3);
-      indices.push_back(vecId);
+      llvm::Value* result = llvm::ExtractElementInst::Create(lhs, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+      return result;
     }
-  }
-  llvm::ConstantVector* mask = 
+  } else {
+    for(int i = 0; i < len; ++i) {
+      char c = swizC[i];
+      if( c == 'x' ) {
+        //first element
+        llvm::Constant* vecId =
+		llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 0);
+        indices.push_back(vecId);
+      } else if( c == 'y' ) {
+        //second element
+        llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 1);
+        indices.push_back(vecId);
+      } else if( c == 'z' ) {
+        //third element    
+        llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 2);
+        indices.push_back(vecId);
+      } else {
+        //fourth element
+        llvm::Constant* vecId =
+                llvm::ConstantInt::get(irgen->IRGenerator::GetIntType(), 3);
+        indices.push_back(vecId);
+      }
+    }
+    llvm::ConstantVector* mask = 
 		(llvm::ConstantVector *)llvm::ConstantVector::get(indices);
-  llvm::Value* result = new llvm::ShuffleVectorInst(lhs, llvm::UndefValue::get(
+    llvm::Value* result = new llvm::ShuffleVectorInst(lhs, llvm::UndefValue::get(
 	lhs->getType()), mask, "", irgen->IRGenerator::GetBasicBlock());
-  return result;
+    return result;
+  }
 }
 
 llvm::Value* FieldAccess::EmitAddress() {
