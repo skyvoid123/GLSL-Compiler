@@ -9,7 +9,7 @@
 #define GLOBAL 1
 #define LOCAL 0
 #define INVALID -1
-#define DEBUG 0
+#define DEBUG 1
 using namespace std;
 
 class Decl;
