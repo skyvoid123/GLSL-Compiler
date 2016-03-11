@@ -586,7 +586,8 @@ llvm::Value* AssignExpr::Emit() {
   if( DEBUG ) {
     printf("Assign\n");
   }
-  llvm::Value* lhs;
+  llvm::Value* lhs = left->Emit();
+  /*
   if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {;
     lhs = leftV->EmitAddress();
   } else if( FieldAccess *f = dynamic_cast<FieldAccess*>(left)) {
@@ -594,7 +595,7 @@ llvm::Value* AssignExpr::Emit() {
   } else {
     if( DEBUG ) printf("assign expr not var or field\n");
     lhs = right->Emit();
-  }
+  }*/
   llvm::Value* rhs = right->Emit();
   if( llvm::StoreInst* si = dynamic_cast<llvm::StoreInst*>(rhs) ) {
     rhs = si->getValueOperand();

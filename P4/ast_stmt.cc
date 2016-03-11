@@ -207,12 +207,12 @@ llvm::Value* WhileStmt::Emit() {
     bb->moveAfter(hb);
     Node::irgen->SetBasicBlock(bb);   
     body->Emit();
+    if (!bb->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, test->Emit(), bb);
+    }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
         llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
-    }
-    if (!bb->getTerminator()) {
-        llvm::BranchInst::Create(bb, fb, test->Emit(), bb);
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
