@@ -114,6 +114,7 @@ class IfStmt : public ConditionalStmt
   
   public:
     IfStmt() : ConditionalStmt(), elseBody(NULL) {}
+    llvm::Value* Emit();
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
     const char *GetPrintNameForNode() { return "IfStmt"; }
     void PrintChildren(int indentLevel);

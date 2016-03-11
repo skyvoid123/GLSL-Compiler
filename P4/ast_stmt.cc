@@ -182,12 +182,12 @@ llvm::Value* ForStmt::Emit() {
     Node::irgen->SetBasicBlock(bb);
     body->Emit();
     step->Emit();
+    if (!bb->getTerminator()) {
+        llvm::BranchInst::Create(bb, fb, test->Emit(),  bb);
+    }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
         llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
-    }
-    if (!bb->getTerminator()) {
-        llvm::BranchInst::Create(bb, fb, test->Emit(),  bb);
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
@@ -209,6 +209,42 @@ llvm::Value* WhileStmt::Emit() {
     body->Emit();
     if (!bb->getTerminator()) {
         llvm::BranchInst::Create(bb, fb, test->Emit(), bb);
+    }
+    fb->moveAfter(Node::irgen->GetBasicBlock());
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+    }
+    Node::irgen->SetBasicBlock(fb);
+    Node::S->exitScope();
+    return NULL;
+}
+
+llvm::Value* IfStmt::Emit() {
+    Node::S->enterScope();
+    if (DEBUG)
+        cout << "IfStmt" << endl;
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::Function *f = Node::irgen->GetFunction();
+    llvm::BasicBlock *hb = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *tb = llvm::BasicBlock::Create(*context, "then", f);
+    llvm::BasicBlock *eb;
+    if (elseBody)
+        eb = llvm::BasicBlock::Create(*context, "else", f);
+    llvm::BasicBlock *fb = llvm::BasicBlock::Create(*context, "if footer", f);
+    llvm::BranchInst::Create(tb, elseBody ? eb : fb, test->Emit(), hb);
+    tb->moveAfter(hb);
+    Node::irgen->SetBasicBlock(tb);
+    body->Emit();
+    if (!tb->getTerminator()) {
+        llvm::BranchInst::Create(fb, tb);
+    }
+    if (elseBody) {
+        eb->moveAfter(Node::irgen->GetBasicBlock());
+        Node::irgen->SetBasicBlock(eb);
+        elseBody->Emit();
+        if (!eb->getTerminator()) {
+            llvm::BranchInst::Create(fb, eb);
+        }
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
