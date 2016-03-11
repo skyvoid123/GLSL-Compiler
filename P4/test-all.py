@@ -17,5 +17,5 @@ for _, _, files in os.walk(TEST_DIRECTORY):
     result = Popen('diff -w - ' + refName+'.out', shell = True, stdin = result.stdout, stdout = PIPE)
     print 'Executing test "%s"' % testName
     print ''.join(result.stdout.readlines())
-    Popen('rm ' + refName + '.bc', shell = True)
+    #Popen('rm ' + refName + '.bc', shell = True)
 
