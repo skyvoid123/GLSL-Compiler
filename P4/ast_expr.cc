@@ -212,10 +212,10 @@ llvm::Value* ArithmeticExpr::Emit() {
             baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId,
                 "", irgen->IRGenerator::GetBasicBlock());
         }
-        llvm::Value* res = new llvm::StoreInst(baseAddr, addr, "",
+      }
+      llvm::Value* res = new llvm::StoreInst(baseAddr, addr, "",
                 irgen->IRGenerator::GetBasicBlock());
         return baseAddr;
-      }
     }
     if( rType->isFloatTy() ) {
       //rhs is float
@@ -244,8 +244,6 @@ llvm::Value* ArithmeticExpr::Emit() {
         //Neg
         llvm::Value* result = llvm::BinaryOperator::CreateFNeg(rhs, "", 
 		irgen->IRGenerator::GetBasicBlock());
-        new llvm::StoreInst(result, addr,
-                irgen->IRGenerator::GetBasicBlock());
         return result;
       } else {
         //shouldnt be here
@@ -776,6 +774,7 @@ llvm::Value* AssignExpr::Emit() {
           baseAddr = llvm::InsertElementInst::Create(baseAddr, binOp, vecId, "",
                 irgen->IRGenerator::GetBasicBlock());
         }
+
         llvm::Value* result = new llvm::StoreInst(baseAddr, lhsAddr, "",
                 irgen->IRGenerator::GetBasicBlock());
         return rhs;
