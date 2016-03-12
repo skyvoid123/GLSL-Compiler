@@ -49,6 +49,9 @@ class Node  {
     Node(yyltype loc);
     Node();
     virtual ~Node() {}
+    static llvm::BasicBlock *breakB;
+    static llvm::BasicBlock *continueB;
+    static llvm::SwitchInst *switchI;
     static Symtab* S;
     static IRGenerator* irgen;
     yyltype *GetLocation()   { return location; }

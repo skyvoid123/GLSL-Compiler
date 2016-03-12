@@ -131,6 +131,7 @@ class BreakStmt : public Stmt
 {
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
+    llvm::Value * Emit();
     const char *GetPrintNameForNode() { return "BreakStmt"; }
 };
 
@@ -138,6 +139,7 @@ class ContinueStmt : public Stmt
 {
   public:
     ContinueStmt(yyltype loc) : Stmt(loc) {}
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "ContinueStmt"; }
 };
 
@@ -170,6 +172,7 @@ class Case : public SwitchLabel
 {
   public:
     Case() : SwitchLabel() {}
+    llvm::Value* Emit();
     Case(Expr *label, Stmt *stmt) : SwitchLabel(label, stmt) {}
     const char *GetPrintNameForNode() { return "Case"; }
 };
@@ -178,6 +181,7 @@ class Default : public SwitchLabel
 {
   public:
     Default(Stmt *stmt) : SwitchLabel(stmt) {}
+    llvm::Value* Emit();
     const char *GetPrintNameForNode() { return "Default"; }
 };
 
@@ -191,6 +195,7 @@ class SwitchStmt : public Stmt
   public:
     SwitchStmt() : expr(NULL), cases(NULL), def(NULL) {}
     SwitchStmt(Expr *expr, List<Stmt*> *cases, Default *def);
+    llvm::Value* Emit();
     virtual const char *GetPrintNameForNode() { return "SwitchStmt"; }
     void PrintChildren(int indentLevel);
 };
