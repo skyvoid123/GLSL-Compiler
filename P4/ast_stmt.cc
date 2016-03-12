@@ -334,6 +334,7 @@ llvm::Value* SwitchStmt::Emit() {
     for (int i = 0;  i < cases->NumElements(); i++) {
         if (Default *de = dynamic_cast<Default*>(cases->Nth(i))) {
             def = de;
+            break;
         }
         cases->Nth(i)->Emit();
     }
