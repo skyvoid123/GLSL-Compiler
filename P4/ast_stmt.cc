@@ -198,7 +198,7 @@ llvm::Value* ForStmt::Emit() {
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
-        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+        llvm::BranchInst::Create(sb, Node::irgen->GetBasicBlock());
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
@@ -237,7 +237,7 @@ llvm::Value* WhileStmt::Emit() {
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
-        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+        llvm::BranchInst::Create(tb, Node::irgen->GetBasicBlock());
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
