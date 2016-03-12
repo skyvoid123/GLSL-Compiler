@@ -1,0 +1,3 @@
+funct: foo
+gin: a, int, 1
+gin: b, int, 2
