@@ -198,7 +198,7 @@ llvm::Value* ForStmt::Emit() {
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
-        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+        llvm::BranchInst::Create(sb, Node::irgen->GetBasicBlock());
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
@@ -237,7 +237,7 @@ llvm::Value* WhileStmt::Emit() {
     }
     fb->moveAfter(Node::irgen->GetBasicBlock());
     if (!Node::irgen->GetBasicBlock()->getTerminator()) {
-        llvm::BranchInst::Create(fb, Node::irgen->GetBasicBlock());
+        llvm::BranchInst::Create(tb, Node::irgen->GetBasicBlock());
     }
     Node::irgen->SetBasicBlock(fb);
     Node::S->exitScope();
@@ -332,11 +332,9 @@ llvm::Value* SwitchStmt::Emit() {
     Node::breakB = foot;
     Node::switchI = llvm::SwitchInst::Create(expr->Emit(), defC, cases->NumElements(), head);
     for (int i = 0;  i < cases->NumElements(); i++) {
-        if (i == cases->NumElements() - 1) {
-            if (Default *de = dynamic_cast<Default*>(cases->Nth(i))) {
-                def = de;
-                break;
-            }
+        if (Default *de = dynamic_cast<Default*>(cases->Nth(i))) {
+            def = de;
+            break;
         }
         cases->Nth(i)->Emit();
     }
@@ -348,9 +346,9 @@ llvm::Value* SwitchStmt::Emit() {
         foot->moveAfter(Node::irgen->GetBasicBlock());
     }
     else {
+        //cout << "NO DEF" << endl;
         defC->moveAfter(Node::irgen->GetBasicBlock());
         llvm::BranchInst::Create(foot, defC);
-        cout << Node::irgen->GetBasicBlock()->getName().str() << endl;
         if (!Node::irgen->GetBasicBlock()->getTerminator()) {
             llvm::BranchInst::Create(defC, Node::irgen->GetBasicBlock());
         }
