@@ -157,11 +157,12 @@ llvm::Value* ArithmeticExpr::Emit() {
     }
     llvm::Value* rhs = right->Emit();
     llvm::Value* addr;
-    
+    const char* cSwiz = "";
     if( VarExpr* rightV = dynamic_cast<VarExpr*>(right) ) {
       addr = rightV->EmitAddress();
     } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(right) ) {
       addr = f->EmitAddress();
+      cSwiz = f->getId()->getName();
     } else {
       if( DEBUG ) printf("prefix not var or field\n");
       addr = right->Emit();
@@ -169,6 +170,53 @@ llvm::Value* ArithmeticExpr::Emit() {
     
     llvm::Type* rType = rhs->getType();
     char* oper = op->getOp();
+    if( strlen(cSwiz) != 0 ) {
+      //field assignment
+      llvm::Constant* inc = llvm::ConstantFP::get(
+		irgen->IRGenerator::GetFloatType(), 1.0);
+      llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
+                irgen->IRGenerator::GetBasicBlock());
+      llvm::Constant* vecId;
+      for( unsigned i = 0; i < strlen(cSwiz); i++ ) {
+        char c = cSwiz[i];
+        if( c == 'x' ) {
+          vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 0);
+        } else if( c == 'y' ) {
+          vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+        } else if( c == 'z' ) {
+          vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+        } else {
+          vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+        }
+        llvm::Value* ext = llvm::ExtractElementInst::Create(baseAddr, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+        if( strcmp(oper, "++") == 0 ) {
+          llvm::Value* result = llvm::BinaryOperator::CreateFAdd(ext, inc, "",
+                irgen->IRGenerator::GetBasicBlock());
+           baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId, 
+		"", irgen->IRGenerator::GetBasicBlock());
+        } else if( strcmp(oper, "--") == 0 ) {
+          llvm::Value* result = llvm::BinaryOperator::CreateFSub(ext, inc, "",
+                irgen->IRGenerator::GetBasicBlock());
+           baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId, 
+		"", irgen->IRGenerator::GetBasicBlock());
+        } else if( strcmp(oper, "+") == 0 ) {
+          
+        } else if( strcmp(oper, "-") == 0 ) {
+           llvm::Value* result = llvm::BinaryOperator::CreateFNeg(ext, "",
+                irgen->IRGenerator::GetBasicBlock());
+            baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId,
+                "", irgen->IRGenerator::GetBasicBlock());
+        }
+        llvm::Value* res = new llvm::StoreInst(baseAddr, addr, "",
+                irgen->IRGenerator::GetBasicBlock());
+        return baseAddr;
+      }
+    }
     if( rType->isFloatTy() ) {
       //rhs is float
       if( strcmp(oper, "++") == 0 ) {
@@ -640,7 +688,7 @@ llvm::Value* AssignExpr::Emit() {
         }
       } else if( rType->isFloatTy() ) {
         //Assigning float to a vector
-        for( int i = 0; i < strlen(cSwiz); i++ ) {
+        for( unsigned i = 0; i < strlen(cSwiz); i++ ) {
           char c = cSwiz[i];
           if( c == 'x' ) {
             vecId = llvm::ConstantInt::get(
@@ -671,6 +719,60 @@ llvm::Value* AssignExpr::Emit() {
     return result;
   } else if( strcmp(oper, "+=") == 0 ) {
     //plus equals
+    if( strlen(cSwiz) != 0 ) {
+      //Is field assignment
+      llvm::Value* baseAddr = new llvm::LoadInst(lhsAddr, "",
+                irgen->IRGenerator::GetBasicBlock());
+      llvm::Constant* vecId;
+      if( rType->isVectorTy() ) {
+        //Assigning vector to a vector
+        for( int i = 0; i < strlen(cSwiz); i++ ) {
+          char c = cSwiz[i];
+          if( c == 'x' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 0);
+          } else if( c == 'y' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+          } else if( c == 'z' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+          } else {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+          }
+          llvm::Constant* extPos = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), i);
+          llvm::Value* ext = llvm::ExtractElementInst::Create(rhs, extPos, "",
+                irgen->IRGenerator::GetBasicBlock());
+          baseAddr = llvm::InsertElementInst::Create(baseAddr, ext, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+        }
+      } else if( rType->isFloatTy() ) {
+        //Assigning float to a vector
+        for( unsigned i = 0; i < strlen(cSwiz); i++ ) {
+          char c = cSwiz[i];
+          if( c == 'x' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 0);
+          } else if( c == 'y' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+          } else if( c == 'z' ) {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+          } else {
+            vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+          }
+          baseAddr = llvm::InsertElementInst::Create(baseAddr, rhs, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+        }
+        llvm::Value* result = new llvm::StoreInst(baseAddr, lhsAddr, "",
+                irgen->IRGenerator::GetBasicBlock());
+        return rhs;
+      }
+    }
     lhs = left->Emit();
     lType = lhs->getType();
     if( lType->isFloatTy() || lType->isVectorTy() ) {
@@ -751,11 +853,12 @@ llvm::Value* PostfixExpr::Emit() {
   }
   llvm::Value* lhs = left->Emit();
   llvm::Value* addr;
- 
+  const char* cSwiz = "";
   if( VarExpr* leftV = dynamic_cast<VarExpr*>(left) ) {
     addr = leftV->EmitAddress();
   } else if( FieldAccess* f = dynamic_cast<FieldAccess*>(left) ) {
     addr = f->EmitAddress();
+    cSwiz = f->getId()->getName();
   } else {
     if( DEBUG ) printf("postfix address not var or field\n");
     addr = left->Emit();
@@ -763,7 +866,76 @@ llvm::Value* PostfixExpr::Emit() {
   
   llvm::Type* lType = lhs->getType();
   char* oper = op->getOp();
-  if( lType->isFloatTy() || lType->isVectorTy() ) {
+  if( strlen(cSwiz) != 0 ) {
+    //field assignment
+    llvm::Constant* inc = llvm::ConstantFP::get(
+		irgen->IRGenerator::GetFloatType(), 1.0);
+    llvm::Value* baseAddr = new llvm::LoadInst(addr, "",
+		irgen->IRGenerator::GetBasicBlock());
+    llvm::Value* baseAddr1 = baseAddr;
+    llvm::Constant* vecId;
+    for( unsigned i = 0; i < strlen(cSwiz); i++ ) {
+      char c = cSwiz[i];
+      if( c == 'x' ) {
+        vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 0);
+      } else if( c == 'y' ) {
+        vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 1);
+      } else if( c == 'z' ) {
+        vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 2);
+      } else {
+        vecId = llvm::ConstantInt::get(
+                irgen->IRGenerator::GetIntType(), 3);
+      }
+      llvm::Value* ext = llvm::ExtractElementInst::Create(baseAddr, vecId, "",
+		irgen->IRGenerator::GetBasicBlock());
+      if( strcmp(oper, "++") == 0 ) {
+        llvm::Value* result = llvm::BinaryOperator::CreateFAdd(ext, inc, "",
+		irgen->IRGenerator::GetBasicBlock());
+        baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId, "",
+		irgen->IRGenerator::GetBasicBlock());
+      } else if( strcmp(oper, "--") == 0 ) {
+        llvm::Value* result = llvm::BinaryOperator::CreateFSub(ext, inc, "",
+                irgen->IRGenerator::GetBasicBlock());
+        baseAddr = llvm::InsertElementInst::Create(baseAddr, result, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+      } else {
+        //shouldnt be here
+      } 
+    }
+    llvm::Value* res = new llvm::StoreInst(baseAddr, addr, "",
+		irgen->IRGenerator::GetBasicBlock());
+    return baseAddr1;
+  }
+  if( lType->isVectorTy() ) {
+    llvm::VectorType* vec = (llvm::VectorType*) lType;
+    llvm::Value* ret = lhs;
+    llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
+    llvm::Value* inc = llvm::ConstantFP::get(fConst, 1.0);
+    for( int i = 0; i < vec->getNumElements(); i++ ) {
+      llvm::Constant* vecId = llvm::ConstantInt::get( 
+		irgen->IRGenerator::GetIntType(), i);
+      llvm::Value* val = llvm::ExtractElementInst::Create(lhs, vecId, "",
+		irgen->IRGenerator::GetBasicBlock());
+      if( strcmp(oper, "++") == 0 ) {
+        llvm::Value* result = llvm::BinaryOperator::CreateFAdd(val, inc, "",
+		irgen->IRGenerator::GetBasicBlock());
+        lhs = llvm::InsertElementInst::Create(lhs, result, vecId, "", 
+		irgen->IRGenerator::GetBasicBlock());
+      } else if( strcmp(oper, "--") == 0 ) {
+        llvm::Value* result = llvm::BinaryOperator::CreateFSub(val, inc, "",
+                irgen->IRGenerator::GetBasicBlock());
+        lhs = llvm::InsertElementInst::Create(lhs, result, vecId, "",
+                irgen->IRGenerator::GetBasicBlock());
+      }
+      
+    } 
+    llvm::Value* res = new llvm::StoreInst(lhs, addr, "",
+		irgen->IRGenerator::GetBasicBlock());
+    return ret;
+  } else if( lType->isFloatTy() ) {
     if( strcmp(oper, "++") == 0 ) {
       //Postfix inc
       llvm::Type* fConst = irgen->IRGenerator::GetFloatType();
