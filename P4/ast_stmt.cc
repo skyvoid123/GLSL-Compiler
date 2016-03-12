@@ -37,6 +37,7 @@ llvm::Value* Program::Emit() {
         decls->Nth(i)->Emit();
     }
     S->exitScope();
+    mod->dump();
     if (DEBUG)
         mod->dump();
     else
@@ -285,6 +286,81 @@ llvm::Value* IfStmt::Emit() {
     return NULL;
 }
 
+llvm::Value* Case::Emit() {
+    if (DEBUG)
+        cout << "SwitchLabel" << endl;
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::Function *f = Node::irgen->GetFunction();
+    llvm::BasicBlock *switchB = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *caseB = llvm::BasicBlock::Create(*context, "case", f);
+    if (!switchB->getTerminator()) {
+        llvm::BranchInst::Create(caseB, switchB);
+    }
+    Node::irgen->SetBasicBlock(caseB);
+    stmt->Emit();
+    Node::switchI->llvm::SwitchInst::addCase(llvm::cast<llvm::ConstantInt>(label->Emit()), caseB);
+    return NULL;
+}
+
+llvm::Value* Default::Emit() {
+    if (DEBUG)
+        cout << "Default" << endl;
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::Function *f = Node::irgen->GetFunction();
+    llvm::BasicBlock *defaultB = llvm::BasicBlock::Create(*context, "default", f);
+    defaultB->moveAfter(Node::irgen->GetBasicBlock());
+    Node::switchI->getDefaultDest()->removeFromParent();
+    if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+        llvm::BranchInst::Create(defaultB, Node::irgen->GetBasicBlock());
+    }
+    Node::irgen->SetBasicBlock(defaultB);
+    stmt->Emit();
+    Node::switchI->setDefaultDest(defaultB);
+    return NULL;
+}
+
+llvm::Value* SwitchStmt::Emit() {
+    if (DEBUG)
+        cout << "SwitchStmt" << endl;
+    llvm::SwitchInst *psi = Node::switchI;
+    llvm::BasicBlock *pbb = Node::breakB;
+    llvm::LLVMContext *context = Node::irgen->GetContext();
+    llvm::Function *f = Node::irgen->GetFunction();
+    llvm::BasicBlock *head = Node::irgen->GetBasicBlock();
+    llvm::BasicBlock *defC = llvm::BasicBlock::Create(*context, "default", f);
+    llvm::BasicBlock *foot = llvm::BasicBlock::Create(*context, "Switch Foot", f);
+    Node::breakB = foot;
+    Node::switchI = llvm::SwitchInst::Create(expr->Emit(), defC, cases->NumElements(), head);
+    for (int i = 0;  i < cases->NumElements(); i++) {
+        if (i == cases->NumElements() - 1) {
+            if (Default *de = dynamic_cast<Default*>(cases->Nth(i))) {
+                def = de;
+                break;
+            }
+        }
+        cases->Nth(i)->Emit();
+    }
+    if (def) {
+        def->Emit();
+        if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+            llvm::BranchInst::Create(foot, Node::irgen->GetBasicBlock());
+        }
+        foot->moveAfter(Node::irgen->GetBasicBlock());
+    }
+    else {
+        defC->moveAfter(Node::irgen->GetBasicBlock());
+        llvm::BranchInst::Create(foot, defC);
+        cout << Node::irgen->GetBasicBlock()->getName().str() << endl;
+        if (!Node::irgen->GetBasicBlock()->getTerminator()) {
+            llvm::BranchInst::Create(defC, Node::irgen->GetBasicBlock());
+        }
+        foot->moveAfter(defC);
+    }
+    Node::irgen->SetBasicBlock(foot);
+    Node::breakB = pbb;
+    Node::switchI = psi;
+    return NULL;
+}
 llvm::Value* BreakStmt::Emit() {
     if (DEBUG)
         cout << "BreakStmt" << endl;

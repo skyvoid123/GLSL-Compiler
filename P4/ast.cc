@@ -12,6 +12,7 @@ Symtab* Node::S = new Symtab();
 IRGenerator* Node::irgen = new IRGenerator();
 llvm::BasicBlock *Node::breakB = NULL;
 llvm::BasicBlock *Node::continueB = NULL;
+llvm::SwitchInst *Node::switchI = NULL;
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
     parent = NULL;
