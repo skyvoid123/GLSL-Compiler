@@ -1,5 +1,6 @@
 int foo () {
     int result;
-    result = --1;
+    result = 0;
+    --result;
     return result;
 }

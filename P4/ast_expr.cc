@@ -276,8 +276,6 @@ llvm::Value* ArithmeticExpr::Emit() {
         //Neg
         llvm::Value* result = llvm::BinaryOperator::CreateNeg(rhs, "",
                 irgen->IRGenerator::GetBasicBlock());
-        new llvm::StoreInst(result, addr,
-                irgen->IRGenerator::GetBasicBlock());
         return result;
       
       } else {
