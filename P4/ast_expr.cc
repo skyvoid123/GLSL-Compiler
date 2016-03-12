@@ -774,7 +774,6 @@ llvm::Value* AssignExpr::Emit() {
           baseAddr = llvm::InsertElementInst::Create(baseAddr, binOp, vecId, "",
                 irgen->IRGenerator::GetBasicBlock());
         }
-
         llvm::Value* result = new llvm::StoreInst(baseAddr, lhsAddr, "",
                 irgen->IRGenerator::GetBasicBlock());
         return rhs;
